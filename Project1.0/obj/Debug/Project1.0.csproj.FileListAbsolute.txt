@@ -14,3 +14,4 @@ C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\D
 C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\WindowsFormsApplication1.Success.resources
 C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Interop.ActiveDs.dll
 C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\bin\Debug\MySql.Data.dll
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\WindowsFormsApplication1.Form2.resources
