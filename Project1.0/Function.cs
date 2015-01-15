@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Reflection;
 
 
 namespace WindowsFormsApplication1
@@ -15,7 +16,7 @@ namespace WindowsFormsApplication1
     {
         static string cs = @"server=localhost;userid=root;password=root;database=voice";
         static MySqlConnection conn = null;
-        MySqlDataReader mdr=null;
+        static MySqlDataReader mdr=null;
         ProcessStartInfo pi;
         DirectoryInfo di;
 
@@ -24,12 +25,54 @@ namespace WindowsFormsApplication1
         List<string> list3 = new List<string>();
 
         static string text1;
+        static string methodName;
 
         public static void setText(string t)
         {
             text1 = t;
         }
 
+        public static void setMethod(string f)
+        {            
+            // Open Database Connection 
+            try
+            {
+                conn = new MySqlConnection(cs);
+                conn.Open();
+
+                string s = "SELECT * FROM command";
+                MySqlCommand cmd = new MySqlCommand(s, conn);
+                mdr = cmd.ExecuteReader();
+
+                while (mdr.Read())
+                {
+                    if (mdr.GetString(1).Equals(f))
+                    {
+                        methodName = mdr.GetString(3);
+                        break;
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Error : {0}", ex.ToString());
+            }
+            finally
+            {
+                if (mdr != null)
+                    mdr.Close();
+                if (conn != null)
+                    conn.Close();
+            }
+            // Close Database Connection
+
+            Type type = typeof(Function);
+            MethodInfo method = type.GetMethod(methodName);         // using System.Reflection;
+            Function c = new Function();
+            method.Invoke(c, null);
+            
+        }
+        
         public void main()
         {
             Process[] pr = Process.GetProcesses();
@@ -169,6 +212,94 @@ namespace WindowsFormsApplication1
                     conn.Close();
             }
             Start(text1, action);            
+        }
+
+        public void shutdown()
+        {
+            Process.Start("shutdown", "/s /t 0");
+        }
+        
+        public void restart()
+        {
+            Process.Start("shutdown", "/r /t 0");
+        }
+
+        // For Logoff
+        [DllImport("user32")]
+        public static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
+        
+        // For Hibernate , Sleep
+        [DllImport("PowrProf.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern bool SetSuspendState(bool hibernate, bool forceCritical, bool disableWakeEvent);
+
+        IntPtr hWnd;
+
+        public void hibernate()
+        {
+            SetSuspendState(true, true, true);
+        }
+
+        public void sleep()
+        {
+            SetSuspendState(false, true, true);
+        }
+
+        public void logoff()
+        {
+            ExitWindowsEx(0, 0);
+        }
+
+        // For closing of window by window title
+        static uint WM_CLOSE = 0x0010;
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll", EntryPoint = "FindWindow")]
+        private static extern IntPtr FindWindowByCaption(IntPtr ZeroOnly, string lp2);
+        
+        public void closeWindow()
+        {
+            hWnd = FindWindowByCaption(IntPtr.Zero, text1);
+            PostMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);            
+        }
+
+        // For Maximizing , minimizing and restore
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+
+        // SW_SHOWMAXIMIZED to maximize the window
+        // SW_SHOWMINIMIZED to minimize the window
+        // SW_SHOWNORMAL to make the window be normal size
+
+        private const int SW_SHOWNORMAL = 1;
+        private const int SW_SHOWMINIMIZED = 2;
+        private const int SW_SHOWMAXIMIZED = 3;
+
+        public void maximize()
+        {
+            hWnd = FindWindowByCaption(IntPtr.Zero, text1);
+            if (!hWnd.Equals(IntPtr.Zero))
+            {
+                ShowWindowAsync(hWnd, SW_SHOWMAXIMIZED);
+            }
+        }
+
+        public void minimize()
+        {
+            hWnd = FindWindowByCaption(IntPtr.Zero, text1);
+            if (!hWnd.Equals(IntPtr.Zero))
+            {
+                ShowWindowAsync(hWnd, SW_SHOWMINIMIZED);
+            }
+        }
+
+        public void restore()
+        {
+            hWnd = FindWindowByCaption(IntPtr.Zero, text1);
+            if (!hWnd.Equals(IntPtr.Zero))
+            {
+                ShowWindowAsync(hWnd, SW_SHOWNORMAL);
+            }
         }
     }
 }

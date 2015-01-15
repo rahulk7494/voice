@@ -16,6 +16,7 @@ using Shell32;                      //Added Reference - Microsoft shell controls
 using IWshRuntimeLibrary;
 using System.Threading;           //Added Reference - Windows script host object model
 using MySql.Data.MySqlClient;
+using System.Reflection;
 
 namespace WindowsFormsApplication1
 {
@@ -476,6 +477,8 @@ namespace WindowsFormsApplication1
             caption();
             string name = textBox1.Text;
             string key = textBox2.Text;
+            string s1 = name.Substring(name.LastIndexOf("-") + 2, name.Length - (name.LastIndexOf("-") + 2));
+            textBox3.Text = s1;
             text1 = textBox1.Text;
             string text2 = textBox3.Text.ToLower();
 
@@ -532,7 +535,6 @@ namespace WindowsFormsApplication1
                 if (mdr2 != null)
                 {
                     mdr2.Close();
-                    //mdr2.Close();
                 }
                 if(conn!=null)
                     conn.Close();
@@ -637,10 +639,10 @@ namespace WindowsFormsApplication1
         {
             text1 = textBox1.Text;
             caption();
-            string s = textBox1.Text;
+            //string s = textBox1.Text;
             //textBox3.Text = s;
-            string s1 = s.Substring(s.LastIndexOf("-") + 2,s.Length - (s.LastIndexOf("-") + 2));
-            textBox3.Text = s1;
+           /* string s1 = s.Substring(s.LastIndexOf("-") + 2, s.Length - (s.LastIndexOf("-") + 2));
+            textBox3.Text = s1;*/
         }
 
         private void button25_Click(object sender, EventArgs e)
@@ -663,8 +665,22 @@ namespace WindowsFormsApplication1
 
         private void button27_Click(object sender, EventArgs e)
         {
-            Function f = new Function();
-            f.main();
+            //Function f = new Function();
+            Function.setText(textBox1.Text);
+            Function.setMethod(textBox2.Text);
+
+            //string methodName = textBox2.Text;
+
+            //MethodInfo mi = this.GetType().GetMethod(methodName);           // using System.Reflection;
+            //mi.Invoke((this, null);
+/*
+            Type type = typeof(Function);
+            MethodInfo method = type.GetMethod(methodName);
+            Function c = new Function();
+            method.Invoke(c, null);*/
+            //Console.WriteLine(result);
+
+            //f.main();
             //Process.Start("::{20d04fe0-3aea-1069-a2d8-08002b30309d}"); // Open My Computer
             //Process.Start("cmd.exe");
             //string myFavoritesPath = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
