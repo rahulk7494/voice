@@ -665,9 +665,9 @@ namespace WindowsFormsApplication1
 
         private void button27_Click(object sender, EventArgs e)
         {
-            //Function f = new Function();
-            Function.setText(textBox1.Text);
-            Function.setMethod(textBox2.Text);
+            Function f = new Function();
+            //Function.setText(textBox1.Text);
+            //Function.setMethod(textBox2.Text);
 
             //string methodName = textBox2.Text;
 
@@ -680,7 +680,7 @@ namespace WindowsFormsApplication1
             method.Invoke(c, null);*/
             //Console.WriteLine(result);
 
-            //f.main();
+            f.main();
             //Process.Start("::{20d04fe0-3aea-1069-a2d8-08002b30309d}"); // Open My Computer
             //Process.Start("cmd.exe");
             //string myFavoritesPath = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);

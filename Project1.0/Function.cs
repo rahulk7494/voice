@@ -16,7 +16,8 @@ namespace WindowsFormsApplication1
     {
         static string cs = @"server=localhost;userid=root;password=root;database=voice";
         static MySqlConnection conn = null;
-        static MySqlDataReader mdr=null;
+        static MySqlDataReader mdr1=null , mdr2=null;
+        static MySqlCommand cmd;
         ProcessStartInfo pi;
         DirectoryInfo di;
 
@@ -25,8 +26,11 @@ namespace WindowsFormsApplication1
         List<string> list3 = new List<string>();
 
         static string text1;
+        static string text2;
         static string methodName;
 
+        int id = 0;
+                
         public static void setText(string t)
         {
             text1 = t;
@@ -42,13 +46,13 @@ namespace WindowsFormsApplication1
 
                 string s = "SELECT * FROM command";
                 MySqlCommand cmd = new MySqlCommand(s, conn);
-                mdr = cmd.ExecuteReader();
+                mdr1 = cmd.ExecuteReader();
 
-                while (mdr.Read())
+                while (mdr1.Read())
                 {
-                    if (mdr.GetString(1).Equals(f))
+                    if (mdr1.GetString(1).Equals(f))
                     {
-                        methodName = mdr.GetString(3);
+                        methodName = mdr1.GetString(3);
                         break;
                     }
                 }
@@ -59,8 +63,8 @@ namespace WindowsFormsApplication1
             }
             finally
             {
-                if (mdr != null)
-                    mdr.Close();
+                if (mdr1 != null)
+                    mdr1.Close();
                 if (conn != null)
                     conn.Close();
             }
@@ -85,8 +89,9 @@ namespace WindowsFormsApplication1
             }
             text1 = "a";
             caption();
-            Console.WriteLine(text1);
+        //    Console.WriteLine(text1);
             sendKey("select all");
+            sendKey("cut");
         }
 
         public void openFile()
@@ -151,6 +156,40 @@ namespace WindowsFormsApplication1
 
             }
             text1 = list1[0];
+            text2 = (text1.Substring(text1.LastIndexOf("-") + 2, text1.Length - (text1.LastIndexOf("-") + 2))).ToLower();
+            Console.WriteLine(text2);
+            
+            try
+            {
+                conn = new MySqlConnection(cs);
+                conn.Open();
+
+                string s;
+                s = "SELECT * FROM application";
+                cmd = new MySqlCommand(s, conn);
+                mdr1 = cmd.ExecuteReader();
+                while (mdr1.Read())
+                {
+                    if (mdr1.GetString(1).Equals(text2))
+                    {
+                        id = mdr1.GetInt32(0);
+                        Console.WriteLine("Match Found : Application Id=" + mdr1.GetInt32(0));
+                        break;
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Error : {0}", ex.ToString());
+            }
+            finally
+            {
+                if (mdr1 != null)
+                    mdr1.Close();
+                if (conn != null)
+                    conn.Close();
+            }
+            
         }
     
         public void tokenize(string text, string temp, int i)
@@ -175,28 +214,30 @@ namespace WindowsFormsApplication1
             }
         }
 
-        
-
         public void sendKey(string key)
         {
-            caption();
+            //caption();
             string action = key;
-
             try
             {
                 conn = new MySqlConnection(cs);
                 conn.Open();
 
-                string s = "SELECT * FROM command";
-                MySqlCommand cmd = new MySqlCommand(s, conn);
-                mdr = cmd.ExecuteReader();
+                string s;
+                s = "SELECT * FROM command";
+                cmd = new MySqlCommand(s, conn);
+                mdr2 = cmd.ExecuteReader();
 
-                while (mdr.Read())
+                while (mdr2.Read())
                 {
-                    if (mdr.GetString(1).Equals(key))
+                    if (mdr2.GetInt32(2).Equals(id))
                     {
-                        action = mdr.GetString(3);
-                        break;
+                        if (mdr2.GetString(1).Equals(key))
+                        {
+                            action = mdr2.GetString(3);
+                            Console.WriteLine("Match Found : Command Id=" + mdr2.GetInt32(0));
+                            break;
+                        }
                     }
                 }
             }
@@ -206,8 +247,8 @@ namespace WindowsFormsApplication1
             }
             finally
             {
-                if (mdr != null)
-                    mdr.Close();
+                if (mdr2 != null)
+                    mdr2.Close();
                 if (conn != null)
                     conn.Close();
             }
