@@ -1,0 +1,17 @@
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\bin\Debug\Project1.0.exe.config
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\bin\Debug\Project1.0.exe
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\bin\Debug\Project1.0.pdb
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Project1.0.csprojResolveAssemblyReference.cache
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\WindowsFormsApplication1.Form1.resources
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\WindowsFormsApplication1.SendMail.resources
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Project1.0.csproj.GenerateResource.Cache
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Project1.0.exe
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Project1.0.pdb
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Interop.IWshRuntimeLibrary.dll
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Interop.Shell32.dll
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Project1.0.csproj.ResolveComReference.cache
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\WindowsFormsApplication1.Success.resources
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\Interop.ActiveDs.dll
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\bin\Debug\MySql.Data.dll
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\Project1.0\Project1.0\obj\Debug\WindowsFormsApplication1.Form2.resources
