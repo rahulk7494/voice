@@ -1,0 +1,12 @@
+C:\Users\RR\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\obj\Debug\OpenNLP.csprojResolveAssemblyReference.cache
+C:\Users\RR\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\OpenNLP.dll
+C:\Users\RR\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\OpenNLP.pdb
+C:\Users\RR\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\SharpEntropy.dll
+C:\Users\RR\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\obj\Debug\OpenNLP.dll
+C:\Users\RR\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\obj\Debug\OpenNLP.pdb
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\OpenNLP.dll
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\OpenNLP.pdb
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\obj\Debug\OpenNLP.csprojResolveAssemblyReference.cache
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\obj\Debug\OpenNLP.dll
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\obj\Debug\OpenNLP.pdb
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\SharpEntropy.dll
