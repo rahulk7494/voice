@@ -34,11 +34,11 @@ namespace WindowsFormsApplication1
 
         private void Form1_Load(object sender, EventArgs e)
         {
-           /* if (radioButton1.Checked == true)
-                reader1.SpeakAsync("Welcome Sir. This is System Voice ready to assist you.hello innovators whats up ? i hope your project is going good ! all th best and keep the hrd work on .");
+            if (radioButton1.Checked == false)
+                reader1.SpeakAsync("Welcome Sir. This is System Voice ready to assist you.hello innovators whats up ? i hope your project is going good ! all the best and keep the hard work on .");
             else
                 reader1.SpeakAsync("Welcome Madam. This is System Voice ready to your assist you");
-       */
+       
         }
         private string[] SplitSentences(String str)
         {
@@ -185,6 +185,16 @@ namespace WindowsFormsApplication1
                         arr4[j] = 3;
                         i++;
                     }
+                    else if (arr1[i] == "DT")
+                    {
+                        arr5[j] = str1;
+                        arr6[j] = str2;
+                        System.IO.File.AppendAllText(@"E:\iota3.txt", arr1[i] + "      " + Environment.NewLine);
+                        System.IO.File.AppendAllText(@"E:\iota4.txt", arr6[j] + "      " + Environment.NewLine);
+                        j++;
+                        arr4[j] = 4;
+                        i++;
+                    }
                     else i++;
                 }
                 else i++;
@@ -193,63 +203,68 @@ namespace WindowsFormsApplication1
 
             len = j;
             i = 0;
-            string application="";
-            //for (i = 0; i < len; )
-                for (i = 0; i < len; i++)
-                {
+            int p=0;
                     
-                    Console.WriteLine("*****" + arr5[i] + "\t" + arr6[i]);
-                    if (arr5[i].Equals("VBG") || arr5[i].Equals("VB"))
+            List<string> application=new List<string>();
+            for (i = 0; i < len; i++)
+            {
+                Console.WriteLine("*****" + arr5[i] + "\t" + arr6[i]);
+                if (arr5[i].Equals("VBG") || arr5[i].Equals("VB"))
+                {
+                    for (p = i + 1; p < len; p++)
                     {
-                        for (int p = i + 1; p < len; p++)
-                        {
-                            if (arr5[p].Equals("NNS") || arr5[p].Equals("NN"))
-                                application += arr6[p];
-                            else
-                                break;
-                        }
+                        if (arr5[p].Equals("NNS") || arr5[p].Equals("NN"))
+                            application.Add(arr6[p]);
+                        else
+                            break;
+                    }
+                    
+                  
+                    //Function.setText(application);
+                    //Function.setApplication(application);
+                   
+                }
+                Console.WriteLine(application);
+                Function.setCommand(arr6[i]);
+                Function.setApp(application);
+                Function f = new Function();
+                f.main();
+                application.Clear();
 
-                        if (application == "browser")
-                        {
-                            string name = string.Empty;
-                            RegistryKey regKey = null;
+                i = p;
+            }
+            /*
+                if (application == "browser")
+                {
+                    string name = string.Empty;
+                    RegistryKey regKey = null;
 
-                            try
-                            {
-                                //set the registry key we want to open
-                                regKey = Registry.ClassesRoot.OpenSubKey("HTTP\\shell\\open\\command", false);
+                    try
+                    {
+                        //set the registry key we want to open
+                        regKey = Registry.ClassesRoot.OpenSubKey("HTTP\\shell\\open\\command", false);
 
-                                //get rid of the enclosing quotes
-                                name = regKey.GetValue(null).ToString().ToLower().Replace("" + (char)34, "");
+                        //get rid of the enclosing quotes
+                        name = regKey.GetValue(null).ToString().ToLower().Replace("" + (char)34, "");
 
-                                //check to see if the value ends with .exe (this way we can remove any command line arguments)
-                                if (!name.EndsWith("exe"))
-                                    //get rid of all command line arguments (anything after the .exe must go)
-                                    name = name.Substring(0, name.LastIndexOf(".exe") + 4);
+                        //check to see if the value ends with .exe (this way we can remove any command line arguments)
+                        if (!name.EndsWith("exe"))
+                            //get rid of all command line arguments (anything after the .exe must go)
+                            name = name.Substring(0, name.LastIndexOf(".exe") + 4);
 
-                            }
-                            catch (Exception ex)
-                            {
-                                name = string.Format("ERROR: An exception of type: {0} occurred in method: {1} in the following module: {2}", ex.GetType(), ex.TargetSite, this.GetType());
-                            }
-                            finally
-                            {
-                                //check and see if the key is still open, if so
-                                //then close it
-                                if (regKey != null)
-                                    regKey.Close();
-                                application=Path.GetFileName(name);
-                                application = (application.Substring(0,application.LastIndexOf(".") + 1)).ToLower();
-                            }
-                        }
-                        Console.WriteLine(application);
-                        Function.setCommand(arr6[i]);
-                        Function.setText(application);
-                        Function f = new Function();
-                        f.main();
-                        //Function.setApplication(application);
-                        application = "";
-                      
+                    }
+                    catch (Exception ex)
+                    {
+                        name = string.Format("ERROR: An exception of type: {0} occurred in method: {1} in the following module: {2}", ex.GetType(), ex.TargetSite, this.GetType());
+                    }
+                    finally
+                    {
+                        //check and see if the key is still open, if so
+                        //then close it
+                        if (regKey != null)
+                            regKey.Close();
+                        application = Path.GetFileName(name);
+                        application = (application.Substring(0, application.LastIndexOf(".") + 1)).ToLower();
                     }
                 }
                 //Function f = new Function();
@@ -278,24 +293,24 @@ namespace WindowsFormsApplication1
                 }*/
 
             
-            for (i = 0; i < j; i++)
+    /*        for (i = 0; i < j; i++)
             {
                 if (arr4[i]==1 && arr6[i] == "browser")
                     arr6[i] = "firefox ";
                 else if (arr4[i] == 0 && arr6[i] == "open")
                     arr6[i] = "start ";
             }
-
+            
             for (i = 0; i < j; i++)
             {
                 System.IO.File.AppendAllText(@"E:\final_run.bat",arr6[i]);
             }
 
-                if (radioButton1.Checked == true)
+             /*   if (radioButton1.Checked == true)
                     reader1.SpeakAsync("Alright Sir. Task performed.Bye");
                 else
                     reader1.SpeakAsync("Alright Madam. Task performed.Bye");
-            
+            */
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -486,17 +501,17 @@ namespace porter {
 
 		*/
 		private bool cvc(int i) {
-			
-            if (cons(i) && cons(i - 1) && !cons(i - 2))
-              return true;
+			char ch=b[i];
+            if (ch == 'w' || ch == 'x' || ch == 'y')
+                return false;
             if (cons(i) && !cons(i - 1) && cons(i - 2))
+              return true;
+            if (!cons(i - 2) && cons(i - 1) && cons(i) && b[i - 2] != 'o')
+                return false;
+            if (!cons(i - 2) && !cons(i - 1) && cons(i))
                 return true;
             if (i < 2 || !cons(i) || cons(i - 1) || !cons(i - 2))
                 return false;
-			int ch = b[i];
-			if (ch == 'w' || ch == 'x' || ch == 'y')
-				return false;
-            System.IO.File.AppendAllText((@"E:\iota_new2.txt"),"Print this      "+ch+Environment.NewLine);
 			return true;
 		}
 

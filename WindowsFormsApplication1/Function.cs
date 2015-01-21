@@ -8,6 +8,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Reflection;
+using System.Text;
 
 
 namespace WindowsFormsApplication1
@@ -25,7 +26,7 @@ namespace WindowsFormsApplication1
         List<string> list2 = new List<string>();
         List<string> list3 = new List<string>();
 
-        static string text1;
+        static string text1="";
         static string text2;
         static string methodName;
         static string command;
@@ -33,14 +34,15 @@ namespace WindowsFormsApplication1
 
         int id = 0;
                 
-        public static void setText(string t)
-        {
-            text1 = t;
-        }
-
         public static void setCommand(string c)
         {
             command = c;
+        }
+
+        public static void setApp(List<string> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+                text1 += (list[i]+" ");   
         }
 
         public static void setApplication(string app)
@@ -63,7 +65,7 @@ namespace WindowsFormsApplication1
                     if (temp.Equals(app))
                     {
                         appId = mdr1.GetInt32(0);
-                        setText(mdr1.GetString(1));
+                        //setText(mdr1.GetString(1));
                         break;
                     }
                 }
@@ -123,7 +125,26 @@ namespace WindowsFormsApplication1
             method.Invoke(c, null);
             
         }
-        
+
+        [DllImport("user32.dll")]
+        static extern int GetForegroundWindow();
+        [DllImport("user32.dll")]
+        static extern int GetWindowText(int hWnd, StringBuilder text, int count);
+
+        public string GetActiveWindow()
+        {
+            const int nChars = 256;
+            int handle = 0;
+            StringBuilder buff = new StringBuilder(nChars);
+            handle = GetForegroundWindow();
+            if (GetWindowText(handle, buff, nChars) > 0)
+            {
+                text1 = buff.ToString();
+                return text1;
+            }
+            return null;
+        }
+
         public void main()
         {
             Process[] pr = Process.GetProcesses();
@@ -135,10 +156,18 @@ namespace WindowsFormsApplication1
                 }
             }
             //text1 = "a";
-            Console.WriteLine(text1);
-            Console.WriteLine(command);
-            caption();
-            sendKey(command);
+            Console.WriteLine("application ="+text1);
+            Console.WriteLine("command ="+command);
+            if (!text1.Equals(""))
+            {
+                caption();
+                sendKey(command);
+            }
+            else
+            {
+                text1 = GetActiveWindow();
+                sendKey(command);
+            }
         //    Console.WriteLine(text1);
         //    sendKey("select all");
          //   sendKey("cut");
@@ -158,6 +187,7 @@ namespace WindowsFormsApplication1
         public void Start(string name, string key)
         {
             Console.WriteLine("" + name + "  " + key);
+            restore();
             IntPtr zero = IntPtr.Zero;
             for (int i = 0; (i < 60) && (zero == IntPtr.Zero); i++)
             {
@@ -191,24 +221,28 @@ namespace WindowsFormsApplication1
             foreach (string token in tokens)
             {
                 int count = list1.Count;
-                Console.WriteLine("*****" + token + " ****" + count);
+                Console.WriteLine("token =" + token + " app count =" + count);
+                Console.WriteLine("---------------------------");
+                Console.WriteLine("List 1 Contents");
                 for (int i = 0; i <= count - 1; i++)
                 {
-                    Console.WriteLine(list1[i]);
+                    Console.Write(list1[i]+"\t");
                     tokenize(list1[i].ToLower(), token.ToLower(), i);
                 }
                 list1.Clear();
-                list1.AddRange(list3);
+                list1.AddRange(list3);          // Copy contents of list3 to list1
+                Console.WriteLine("---------------------------");
+                Console.WriteLine("List 3 contents (copied to list 1)");
                 for (int j = 0; j <= list1.Count - 1; j++)
                     Console.WriteLine(list1[j]);
-                Console.WriteLine("*****" + token + " ****" + list1.Count);
                 list3.Clear();
             }
-            for (int a = 0; a < list1.Count; a++)
-                Console.WriteLine(" i=" + a + "  " + list1[a]);
+            /*for (int a = 0; a < list1.Count; a++)
+                Console.WriteLine(" i=" + a + "  " + list1[a]);*/
             text1 = list1[0];
             text2 = (text1.Substring(text1.LastIndexOf("-") + 2, text1.Length - (text1.LastIndexOf("-") + 2))).ToLower();
-            Console.WriteLine(text2);
+            Console.WriteLine("---------------------------");
+            Console.WriteLine("Application  Name = " + text2);        // app name extracted from windows form title
             
             try
             {
@@ -253,16 +287,9 @@ namespace WindowsFormsApplication1
             }
             int index;
             index = list2.IndexOf(temp);
-            Console.WriteLine("" + index);
-            if (index < 0)
-            {
-            }
-            else
-            {
-                list3.Add(list1[i]);
-                for (int j = 0; j < list3.Count; j++)
-                    Console.WriteLine(list3[j]);
-            }
+            Console.WriteLine(index);
+            if (index >= 0)
+               list3.Add(list1[i]);
         }
 
         public void sendKey(string key)
