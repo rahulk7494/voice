@@ -96,10 +96,6 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Project1.0\Project1.0\Project1.0.csproj">
-      <Project>{fe681f57-f4a8-4aef-9304-fdc20bfed5b8}</Project>
-      <Name>Project1.0</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OpenNLP\OpenNLP.csproj">
       <Project>{b70185df-81fd-4417-914f-7c90e65e7d9f}</Project>
       <Name>OpenNLP</Name>

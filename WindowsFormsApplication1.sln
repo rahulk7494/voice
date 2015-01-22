@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApplication1", "WindowsFormsApplication1\WindowsFormsApplication1.csproj", "{4FE17CA3-EB9B-40A8-B03C-8B8A9E5B2850}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1.0", "..\Project1.0\Project1.0\Project1.0.csproj", "{FE681F57-F4A8-4AEF-9304-FDC20BFED5B8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenNLP", "OpenNLP\OpenNLP.csproj", "{B70185DF-81FD-4417-914F-7C90E65E7D9F}"
 EndProject
 Global
@@ -17,10 +15,6 @@ Global
 		{4FE17CA3-EB9B-40A8-B03C-8B8A9E5B2850}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FE17CA3-EB9B-40A8-B03C-8B8A9E5B2850}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FE17CA3-EB9B-40A8-B03C-8B8A9E5B2850}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FE681F57-F4A8-4AEF-9304-FDC20BFED5B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FE681F57-F4A8-4AEF-9304-FDC20BFED5B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FE681F57-F4A8-4AEF-9304-FDC20BFED5B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FE681F57-F4A8-4AEF-9304-FDC20BFED5B8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B70185DF-81FD-4417-914F-7C90E65E7D9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B70185DF-81FD-4417-914F-7C90E65E7D9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B70185DF-81FD-4417-914F-7C90E65E7D9F}.Release|Any CPU.ActiveCfg = Release|Any CPU

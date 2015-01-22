@@ -13,6 +13,7 @@ using System.Speech.Recognition;
 using System.Data.Odbc;
 using MySql.Data.MySqlClient;
 using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace WindowsFormsApplication1
 {
@@ -34,11 +35,12 @@ namespace WindowsFormsApplication1
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            /*
             if (radioButton1.Checked == false)
                 reader1.SpeakAsync("Welcome Sir. This is System Voice ready to assist you.hello innovators whats up ? i hope your project is going good ! all the best and keep the hard work on .");
             else
                 reader1.SpeakAsync("Welcome Madam. This is System Voice ready to your assist you");
-       
+            */
         }
         private string[] SplitSentences(String str)
         {
@@ -54,7 +56,7 @@ namespace WindowsFormsApplication1
         {
             if (mTokenizer == null)
             {
-                              mTokenizer = new OpenNLP.Tools.Tokenize.EnglishMaximumEntropyTokenizer(mModelPath + "EnglishTok.nbin");
+                mTokenizer = new OpenNLP.Tools.Tokenize.EnglishMaximumEntropyTokenizer(mModelPath + "EnglishTok.nbin");
             }
             return mTokenizer.Tokenize(sentence);
         }
@@ -200,39 +202,84 @@ namespace WindowsFormsApplication1
                 else i++;
                
             }
-
+            
+            //Function f = new Function();
+            //f.searchFile();
+            
             len = j;
             i = 0;
-            int p=0;
-                    
-            List<string> application=new List<string>();
+            int p,k,z;
+            p = k = z = 0;
+
+            List<string> commandList = new List<string>();
+            List<string> applicationList = new List<string>();
+            bool temp = false;
+            string application="";
+
             for (i = 0; i < len; i++)
             {
                 Console.WriteLine("*****" + arr5[i] + "\t" + arr6[i]);
                 if (arr5[i].Equals("VBG") || arr5[i].Equals("VB"))
                 {
+                    k = i;
+                    commandList.Add(arr6[k]);
+                    temp = true;
+
                     for (p = i + 1; p < len; p++)
                     {
                         if (arr5[p].Equals("NNS") || arr5[p].Equals("NN"))
-                            application.Add(arr6[p]);
+                            application += arr6[p];
                         else
+                        {
+                            application += "";
                             break;
+                        }
                     }
-                    
-                  
-                    //Function.setText(application);
-                    //Function.setApplication(application);
-                   
                 }
-                Console.WriteLine(application);
+                applicationList.Add(application);
+                z++;
+                i = p;
+
+                if (arr5[i].Equals("CC")||(arr5[i].Equals("IN")))
+                    continue;
+                else
+                {
+                    if (temp)
+                        break;
+                }
+            }
+                  
+           for (i = 0; i < z; i++)
+            {
+                if (commandList[i].Equals("open"))
+                {
+                    //textBox1.Focus();
+                    //Process.Start("paint.exe");
+                    //Function.searchFile(application);
+                    Function f = new Function();
+                    f.main();
+                
+                }
+                //Function.setCommand(commandList[i]);
+                //Function.setText(applicationList[i]);
+                
+                //Function f = new Function();
+                
+                //f.main();
+                //Function.setApplication(application);
+            } 
+        }
+
+            /*Console.WriteLine(application);
                 Function.setCommand(arr6[i]);
-                Function.setApp(application);
+                Function.setText(application);
+                    //Function.setApp(application);
                 Function f = new Function();
                 f.main();
-                application.Clear();
-
-                i = p;
-            }
+              */  
+        
+             //   i = p;
+        
             /*
                 if (application == "browser")
                 {
@@ -311,7 +358,7 @@ namespace WindowsFormsApplication1
                 else
                     reader1.SpeakAsync("Alright Madam. Task performed.Bye");
             */
-        }
+        
 
         private void button2_Click(object sender, EventArgs e)
         {

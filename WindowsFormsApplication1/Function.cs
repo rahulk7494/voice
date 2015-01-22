@@ -33,7 +33,12 @@ namespace WindowsFormsApplication1
         static int appId = 0;
 
         int id = 0;
-                
+
+        public static void setText(string t)
+        {
+            text1 = t;
+        }
+
         public static void setCommand(string c)
         {
             command = c;
@@ -42,7 +47,9 @@ namespace WindowsFormsApplication1
         public static void setApp(List<string> list)
         {
             for (int i = 0; i < list.Count; i++)
-                text1 += (list[i]+" ");   
+                text1 += (list[i]+" ");
+            text1 = text1.Replace(" ", "");
+            text1 += ".exe";
         }
 
         public static void setApplication(string app)
@@ -56,7 +63,7 @@ namespace WindowsFormsApplication1
                 string s = "SELECT * FROM application";
                 MySqlCommand cmd = new MySqlCommand(s, conn);
                 mdr1 = cmd.ExecuteReader();
-
+                appId = 0;
                 while (mdr1.Read())
                 {
                     string temp=mdr1.GetString(1);
@@ -69,6 +76,7 @@ namespace WindowsFormsApplication1
                         break;
                     }
                 }
+                Console.WriteLine("App Id = "+appId);
             }
             catch (MySqlException ex)
             {
@@ -156,8 +164,9 @@ namespace WindowsFormsApplication1
                 }
             }
             //text1 = "a";
-            Console.WriteLine("application ="+text1);
-            Console.WriteLine("command ="+command);
+            Console.WriteLine("application = "+text1);
+            Console.WriteLine("command = "+command);
+
             if (!text1.Equals(""))
             {
                 caption();
@@ -166,18 +175,69 @@ namespace WindowsFormsApplication1
             else
             {
                 text1 = GetActiveWindow();
-                sendKey(command);
+                sendKey("{F4}");
+                sendKey("^a");
+                sendKey("^c");
+                sendKey("{F6}");
+                //text1 = "voice";
+                // Retrieves data
+                IDataObject iData = Clipboard.GetDataObject();
+                // Is Data Text?
+                string path="";
+                if (iData.GetDataPresent(DataFormats.Text))
+                    path=(String)iData.GetData(DataFormats.Text);
+                else
+                    Console.WriteLine("Data not found.");
+                Console.WriteLine(path);
+                Console.WriteLine(Path.GetFileName(path));
+                //string name = Path.GetFileName(path);
+                //text1 = name;
+                //caption();
+                //sendKey("^a");
+                //Process.Start("explorer.exe", @""+path);
+                //caption();
+                //sendKey("^v");
+                //sendKey(command);
             }
         //    Console.WriteLine(text1);
         //    sendKey("select all");
          //   sendKey("cut");
         }
 
-        public void openFile()
-        {
+        List<string> list4 = new List<string>();
 
+        public static void searchFile(string text)
+        {
+            string[] name={"Program Files","Windows","Windows\\System32"};
+            DirectoryInfo dirInfo;
+
+            foreach (string s in name)
+            {
+                try
+                {
+                    dirInfo = new DirectoryInfo(@"C:\" + s);
+                    var exeFiles = dirInfo.EnumerateFiles("*.exe", SearchOption.AllDirectories);
+                    foreach (var exeFile in exeFiles)
+                    {
+                        //Console.WriteLine(exeFile);
+                        if (exeFile.ToString().IndexOf(text) >= 0)
+                        {
+                            Process.Start("" + exeFile);
+                            Console.WriteLine(exeFile);
+                            break;
+                        }
+                    }
+                    
+                }
+                catch (System.Exception excpt)
+                {
+                    Console.WriteLine(excpt.Message);
+                }
+            }
+            Console.WriteLine("----------------ALL DONE------------------");
+            
         }
-        
+
         [DllImport("user32.dll")]
         private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
