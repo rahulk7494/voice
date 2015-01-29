@@ -16,7 +16,8 @@ namespace Function
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new WindowsFormsApplication1.Morphological());
+            Application.Run(new WindowsFormsApplication1.Speech());
+            //Application.Run(new WindowsFormsApplication1.Morphological());
         }
     }
 }

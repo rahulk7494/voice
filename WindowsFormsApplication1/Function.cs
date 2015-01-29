@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Reflection;
 using System.Text;
+using System.Security.Principal;
+using System.Security.AccessControl;
 
 
 namespace WindowsFormsApplication1
@@ -19,9 +21,7 @@ namespace WindowsFormsApplication1
         static MySqlConnection conn = null;
         static MySqlDataReader mdr1=null , mdr2=null;
         static MySqlCommand cmd;
-        ProcessStartInfo pi;
-        DirectoryInfo di;
-
+       
         List<string> list1 = new List<string>();
         List<string> list2 = new List<string>();
         List<string> list3 = new List<string>();
@@ -32,7 +32,7 @@ namespace WindowsFormsApplication1
         static string command;
         static int appId = 0;
 
-        int id = 0;
+       // int id = 0;
 
         public static void setText(string t)
         {
@@ -42,55 +42,6 @@ namespace WindowsFormsApplication1
         public static void setCommand(string c)
         {
             command = c;
-        }
-
-        public static void setApp(List<string> list)
-        {
-            for (int i = 0; i < list.Count; i++)
-                text1 += (list[i]+" ");
-            text1 = text1.Replace(" ", "");
-            text1 += ".exe";
-        }
-
-        public static void setApplication(string app)
-        {
-            // Open Database Connection 
-            try
-            {
-                conn = new MySqlConnection(cs);
-                conn.Open();
-
-                string s = "SELECT * FROM application";
-                MySqlCommand cmd = new MySqlCommand(s, conn);
-                mdr1 = cmd.ExecuteReader();
-                appId = 0;
-                while (mdr1.Read())
-                {
-                    string temp=mdr1.GetString(1);
-                    temp=temp.Replace(" ", "");
-                    Console.WriteLine(temp);
-                    if (temp.Equals(app))
-                    {
-                        appId = mdr1.GetInt32(0);
-                        //setText(mdr1.GetString(1));
-                        break;
-                    }
-                }
-                Console.WriteLine("App Id = "+appId);
-            }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine("Error : {0}", ex.ToString());
-            }
-            finally
-            {
-                if (mdr1 != null)
-                    mdr1.Close();
-                if (conn != null)
-                    conn.Close();
-            }
-            // Close Database Connection
-
         }
 
         public static void setMethod(string f)
@@ -148,6 +99,7 @@ namespace WindowsFormsApplication1
             if (GetWindowText(handle, buff, nChars) > 0)
             {
                 text1 = buff.ToString();
+                Value.activeApplication = text1;
                 return text1;
             }
             return null;
@@ -155,60 +107,49 @@ namespace WindowsFormsApplication1
 
         public void main()
         {
-            Process[] pr = Process.GetProcesses();
-            foreach (Process p in pr)
-            {
-                if (!(string.IsNullOrEmpty(p.MainWindowTitle)))
-                {
-                    list1.Add(p.MainWindowTitle);
-                }
-            }
-            //text1 = "a";
             Console.WriteLine("application = "+text1);
             Console.WriteLine("command = "+command);
 
             if (!text1.Equals(""))
             {
-                caption();
-                sendKey(command);
+                if (caption() == 1)
+                    sendKey(command);
+                else
+                {
+                    appId = 0;
+                    sendKey(command);
+                }
+                
             }
             else
             {
                 text1 = GetActiveWindow();
-                sendKey("{F4}");
-                sendKey("^a");
-                sendKey("^c");
-                sendKey("{F6}");
-                //text1 = "voice";
-                // Retrieves data
-                IDataObject iData = Clipboard.GetDataObject();
-                // Is Data Text?
-                string path="";
-                if (iData.GetDataPresent(DataFormats.Text))
-                    path=(String)iData.GetData(DataFormats.Text);
-                else
-                    Console.WriteLine("Data not found.");
-                Console.WriteLine(path);
-                Console.WriteLine(Path.GetFileName(path));
-                //string name = Path.GetFileName(path);
-                //text1 = name;
-                //caption();
-                //sendKey("^a");
-                //Process.Start("explorer.exe", @""+path);
-                //caption();
-                //sendKey("^v");
-                //sendKey(command);
+                appId = 0;
+                sendKey(command);                
             }
-        //    Console.WriteLine(text1);
-        //    sendKey("select all");
-         //   sendKey("cut");
+            Console.WriteLine("Active Window : " + text1);
+            Value.activeApplication = text1;            
         }
 
         List<string> list4 = new List<string>();
 
-        public static void searchFile(string text)
+       /* private static void SetPermissions(string dirPath)
         {
-            string[] name={"Program Files","Windows","Windows\\System32"};
+            DirectoryInfo info = new DirectoryInfo(dirPath);
+            WindowsIdentity self = System.Security.Principal.WindowsIdentity.GetCurrent();
+            DirectorySecurity ds = info.GetAccessControl();
+            ds.AddAccessRule(new FileSystemAccessRule(self.Name,
+            FileSystemRights.FullControl,
+            InheritanceFlags.ObjectInherit |
+            InheritanceFlags.ContainerInherit,
+            PropagationFlags.None,
+            AccessControlType.Allow));
+            info.SetAccessControl(ds);
+        }**/
+
+        public static int searchFile(string text)
+        {
+            string[] name={"Program Files","Program Files (x86)","Windows","Windows\\System32"};
             DirectoryInfo dirInfo;
 
             foreach (string s in name)
@@ -216,6 +157,7 @@ namespace WindowsFormsApplication1
                 try
                 {
                     dirInfo = new DirectoryInfo(@"C:\" + s);
+                    //SetPermissions(@"C:\"+s);
                     var exeFiles = dirInfo.EnumerateFiles("*.exe", SearchOption.AllDirectories);
                     foreach (var exeFile in exeFiles)
                     {
@@ -223,8 +165,10 @@ namespace WindowsFormsApplication1
                         if (exeFile.ToString().IndexOf(text) >= 0)
                         {
                             Process.Start("" + exeFile);
-                            Console.WriteLine(exeFile);
-                            break;
+                            string str = exeFile.ToString().Remove(exeFile.ToString().IndexOf(".exe"));
+                            Value.activeApplication = str;
+                            // Console.WriteLine(exeFile);
+                            return 1;
                         }
                     }
                     
@@ -235,7 +179,7 @@ namespace WindowsFormsApplication1
                 }
             }
             Console.WriteLine("----------------ALL DONE------------------");
-            
+            return 0;
         }
 
         [DllImport("user32.dll")]
@@ -275,9 +219,17 @@ namespace WindowsFormsApplication1
             return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public void caption()
+        public int caption()
         {
             string[] tokens = GreedyTokenize(text1);
+            Process[] pr = Process.GetProcesses();
+            foreach (Process p in pr)
+            {
+                if (!(string.IsNullOrEmpty(p.MainWindowTitle)))
+                {
+                    list1.Add(p.MainWindowTitle);
+                }
+            }
             foreach (string token in tokens)
             {
                 int count = list1.Count;
@@ -299,8 +251,16 @@ namespace WindowsFormsApplication1
             }
             /*for (int a = 0; a < list1.Count; a++)
                 Console.WriteLine(" i=" + a + "  " + list1[a]);*/
-            text1 = list1[0];
-            text2 = (text1.Substring(text1.LastIndexOf("-") + 2, text1.Length - (text1.LastIndexOf("-") + 2))).ToLower();
+            try
+            {
+                text1 = list1[0];
+                text2 = (text1.Substring(text1.LastIndexOf("-") + 2, text1.Length - (text1.LastIndexOf("-") + 2))).ToLower();
+            }
+            catch (Exception e)
+            {
+                Value.status = "Application Not Found";
+                Console.WriteLine(e.ToString());
+            }
             Console.WriteLine("---------------------------");
             Console.WriteLine("Application  Name = " + text2);        // app name extracted from windows form title
             
@@ -317,9 +277,9 @@ namespace WindowsFormsApplication1
                 {
                     if (mdr1.GetString(1).Equals(text2))
                     {
-                        id = mdr1.GetInt32(0);
+                        appId = mdr1.GetInt32(0);
                         Console.WriteLine("Match Found : Application Id=" + mdr1.GetInt32(0));
-                        break;
+                        return 1;
                     }
                 }
             }
@@ -334,7 +294,7 @@ namespace WindowsFormsApplication1
                 if (conn != null)
                     conn.Close();
             }
-            
+            return 0;
         }
     
         public void tokenize(string text, string temp, int i)
@@ -368,7 +328,7 @@ namespace WindowsFormsApplication1
 
                 while (mdr2.Read())
                 {
-                    if (mdr2.GetInt32(2).Equals(id))
+                    if (mdr2.GetInt32(2).Equals(appId))
                     {
                         if (mdr2.GetString(1).Equals(key))
                         {
@@ -482,3 +442,31 @@ namespace WindowsFormsApplication1
         }
     }
 }
+
+/*
+if(caption()==1)
+                    
+Console.WriteLine(text1);
+//sendKey("{F4}");
+sendKey("^a");
+sendKey("^c");
+//sendKey("{F6}");
+//text1 = "voice";
+// Retrieves data
+IDataObject iData = Clipboard.GetDataObject();
+// Is Data Text?
+string path="";
+if (iData.GetDataPresent(DataFormats.Text))
+    path=(String)iData.GetData(DataFormats.Text);
+else
+    Console.WriteLine("Data not found.");
+Console.WriteLine(path);
+Console.WriteLine(Path.GetFileName(path));
+//string name = Path.GetFileName(path);
+//text1 = name;
+//caption();
+//sendKey("^a");
+//Process.Start("explorer.exe", @""+path);
+//caption();
+//sendKey("^v");
+//sendKey(command);*/

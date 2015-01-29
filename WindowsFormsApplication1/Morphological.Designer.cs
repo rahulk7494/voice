@@ -40,7 +40,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(283, 108);
+            this.button1.Location = new System.Drawing.Point(264, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(111, 62);
             this.button1.TabIndex = 0;
@@ -60,7 +60,7 @@
             // 
             // textBox3
             // 
-            this.textBox3.Location = new System.Drawing.Point(239, 249);
+            this.textBox3.Location = new System.Drawing.Point(23, 228);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(238, 20);
             this.textBox3.TabIndex = 4;
@@ -99,16 +99,16 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(391, 211);
+            this.textBox1.Location = new System.Drawing.Point(23, 108);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(329, 20);
+            this.textBox1.Size = new System.Drawing.Size(352, 20);
             this.textBox1.TabIndex = 10;
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(478, 108);
+            this.textBox2.Location = new System.Drawing.Point(23, 168);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(287, 20);
+            this.textBox2.Size = new System.Drawing.Size(352, 20);
             this.textBox2.TabIndex = 11;
             // 
             // Morphological

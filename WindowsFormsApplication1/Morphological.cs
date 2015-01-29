@@ -69,7 +69,7 @@ namespace WindowsFormsApplication1
             return mPosTagger.Tag(tokens);
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        public void buttonClicked()
         {
             String sql= "Select * from Application";
             MySqlConnection con = new MySqlConnection("host=localhost;user=root;password=root;database=voice;");
@@ -86,6 +86,7 @@ namespace WindowsFormsApplication1
             String[] arr6 = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" ,"",""};
             String str1, str2;
             // reader.Dispose();
+            
             if (File.Exists(@"E:\iota.txt"))
             {
                 File.Delete(@"E:\iota.txt");
@@ -211,11 +212,12 @@ namespace WindowsFormsApplication1
             int p,k,z;
             p = k = z = 0;
 
+            List<string> application = new List<string>();
             List<string> commandList = new List<string>();
             List<string> applicationList = new List<string>();
             bool temp = false;
-            string application="";
-
+            //string application="";
+            Console.WriteLine(len);
             for (i = 0; i < len; i++)
             {
                 Console.WriteLine("*****" + arr5[i] + "\t" + arr6[i]);
@@ -224,50 +226,82 @@ namespace WindowsFormsApplication1
                     k = i;
                     commandList.Add(arr6[k]);
                     temp = true;
-
                     for (p = i + 1; p < len; p++)
                     {
                         if (arr5[p].Equals("NNS") || arr5[p].Equals("NN"))
-                            application += arr6[p];
+                            application.Add(arr6[p]);
                         else
                         {
-                            application += "";
+                            application.Add("");
                             break;
                         }
                     }
                 }
-                applicationList.Add(application);
+                else if (arr5[i].Equals("NN") || arr5[i].Equals("NNS"))
+                {
+                    commandList.Add(arr6[k]);
+                }
+
                 z++;
                 i = p;
+                Console.WriteLine(i);
 
-                if (arr5[i].Equals("CC")||(arr5[i].Equals("IN")))
+                if (arr5[i].Equals("CC") || (arr5[i].Equals("IN")))
+                {
+                    application.RemoveAt(application.Count - 1);
                     continue;
+                }
                 else
                 {
                     if (temp)
                         break;
                 }
+                
             }
-                  
+
+            //Function f = new Function();
+            int flag1 = 0;
+
+            Console.WriteLine("*********************");
            for (i = 0; i < z; i++)
             {
+                if (application == null || application.All(x => string.IsNullOrEmpty(x)))
+                {
+                    Console.WriteLine(Value.activeApplication);
+                    application.Add(Value.activeApplication);
+                }
+                Console.WriteLine(commandList[i]);
+                Console.WriteLine(application[application.Count-1]);
+
                 if (commandList[i].Equals("open"))
                 {
-                    //textBox1.Focus();
-                    //Process.Start("paint.exe");
-                    //Function.searchFile(application);
+                    if (flag1 == 0)
+                    {
+                        if (Function.searchFile(application[i]) == 1)
+                            flag1 = 1;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Process.Start(@"" + application[i]);
+                    }
+
+                }
+                if (flag1 == 0)
+                {
+                    Function.setCommand(commandList[i]);
+                    Function.setText(application[i]);
                     Function f = new Function();
                     f.main();
-                
+                    flag1 = 0;    
                 }
-                //Function.setCommand(commandList[i]);
-                //Function.setText(applicationList[i]);
-                
-                //Function f = new Function();
-                
-                //f.main();
-                //Function.setApplication(application);
-            } 
+                flag1 = 0;
+            }
+           //Application.Restart();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            buttonClicked();
         }
 
             /*Console.WriteLine(application);
@@ -371,6 +405,7 @@ namespace WindowsFormsApplication1
         
         private void button3_Click_1(object sender, EventArgs e)
         {
+            /*
             SpeechRecognitionEngine recognizer = new SpeechRecognitionEngine();
             Grammar dictationGrammar = new DictationGrammar();
             recognizer.LoadGrammar(dictationGrammar);
@@ -390,7 +425,7 @@ namespace WindowsFormsApplication1
             {
                 recognizer.UnloadAllGrammars();
             }
-
+            */
         }
    }
     
@@ -837,53 +872,64 @@ namespace porter {
                 File.Delete(@"E:\iota_new2.txt");
             }
 			for (int i = 0; i < args.Length; i++)
-				try {
-					FileStream _in = new FileStream( @"E:\vesper.txt", FileMode.Open, FileAccess.Read );
-					try {
-						while(true) {
-							int ch = _in.ReadByte();
-							if ( Char.IsLetter((char) ch)) {
-								int j = 0;
-								while(true) {
-									ch = Char.ToLower((char) ch);
-									w[j] = (char) ch;
-									if (j < 500)
-										j++;
-                                  
-									ch = _in.ReadByte();
-									if (!Char.IsLetter((char) ch)) {
-										/* to test add(char ch) */
-										for (int c = 0; c < j; c++)
-											s.add(w[c]);
-										/* or, to test add(char[] w, int j) */
-										/* s.add(w, j); */
-										s.stem();
-								
-										String u;
+                try
+                {
+                    FileStream _in = new FileStream(@"E:\vesper.txt", FileMode.Open, FileAccess.Read);
+                    try
+                    {
+                        while (true)
+                        {
+                            int ch = _in.ReadByte();
+                            if (Char.IsLetter((char)ch))
+                            {
+                                int j = 0;
+                                while (true)
+                                {
+                                    ch = Char.ToLower((char)ch);
+                                    w[j] = (char)ch;
+                                    if (j < 500)
+                                        j++;
 
-										/* and now, to test toString() : */
-										u = s.ToString();
+                                    ch = _in.ReadByte();
+                                    if (!Char.IsLetter((char)ch))
+                                    {
+                                        /* to test add(char ch) */
+                                        for (int c = 0; c < j; c++)
+                                            s.add(w[c]);
+                                        /* or, to test add(char[] w, int j) */
+                                        /* s.add(w, j); */
+                                        s.stem();
 
-										/* to test getResultBuffer(), getResultLength() : */
-										/* u = new String(s.getResultBuffer(), 0, s.getResultLength()); */
+                                        String u;
+
+                                        /* and now, to test toString() : */
+                                        u = s.ToString();
+
+                                        /* to test getResultBuffer(), getResultLength() : */
+                                        /* u = new String(s.getResultBuffer(), 0, s.getResultLength()); */
                                         System.IO.File.AppendAllText((@"E:\iota_new.txt"), u + Environment.NewLine);
-										Console.Write(u);
-										break;
-									}
-								}
-							}
-							if (ch < 0)
-								break;
-							Console.Write((char)ch);
-						}
-					} catch (IOException ) {
-						Console.WriteLine("error reading " + args[i]);
-						break;
-					}
-				} catch (FileNotFoundException ) {
-					Console.WriteLine("file " + args[i] + " not found");
-					break;
-				}
+                                        Console.Write(u);
+                                        break;
+                                    }
+                                }
+                            }
+                            if (ch < 0)
+                                break;
+                            Console.Write((char)ch);
+                        }
+                        _in.Close();
+                    }
+                    catch (IOException)
+                    {
+                        Console.WriteLine("error reading " + args[i]);
+                        break;
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    Console.WriteLine("file " + args[i] + " not found");
+                    break;
+                }
 		}
 	}
 }
