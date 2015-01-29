@@ -4,3 +4,7 @@ Version 2.0
   
 Version 2.1
   - Optimized the functionalities present in Version 2.0
+
+Version 3.0
+  - Integrated SAPI with VOICE
+  - Upto Two words listens continuously
