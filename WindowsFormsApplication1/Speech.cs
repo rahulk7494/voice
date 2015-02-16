@@ -11,7 +11,9 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Speech.Synthesis;
 using System.Speech.Recognition;
+using System.Runtime.InteropServices;
 using System.IO;
+using Microsoft.Win32;
 
 namespace WindowsFormsApplication1
 {
@@ -27,7 +29,12 @@ namespace WindowsFormsApplication1
             this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
         }
 
-        static string[] line = System.IO.File.ReadAllLines(@"E:\words.txt");
+        public Speech(string text)
+        {
+            this.textBox2.Text = text;
+        }
+
+        static string[] line = System.IO.File.ReadAllLines(@"E:\word.txt");
 
         private static IEnumerable<string> Combinations(int start, int level)
         {
@@ -58,7 +65,8 @@ namespace WindowsFormsApplication1
             textBox2.Text = "Starting recognition ....";
             
             textBox2.Text = "Load Complete";
-            
+            textBox3.Text = Value.mode;
+
             Console.WriteLine("------------------------------------");
 
             recognizer.LoadGrammarAsync(new Grammar(new GrammarBuilder(new Choices(l)))); //Loads a grammar choice into the speech recognition engine
@@ -97,52 +105,74 @@ namespace WindowsFormsApplication1
                 Morphological m = new Morphological();
                 m.buttonClicked();
             }
-            else if (e.Result.Text.IndexOf("sorry") >= 0)
+            else if (e.Result.Text.IndexOf("backspace") >= 0)
             {
                 Console.WriteLine(textBox1.Text);
                 string arr = textBox1.Text.Remove(textBox1.Text.LastIndexOf(" "));
                 Console.WriteLine(arr);
                 textBox1.Text = arr;
             }
-            else if (e.Result.Text.IndexOf("flush") >= 0)
+            else if (e.Result.Text.IndexOf("empty") >= 0)
             {
                 Console.WriteLine(textBox1.Text);
                 textBox1.Text = "";
             }
-            else if (e.Result.Text.IndexOf("write into") >= 0)
+            else if (e.Result.Text.IndexOf("dictation mode") >= 0)
             {
-                string arr = textBox1.Text.Remove(0,textBox1.Text.Count()-textBox1.Text.LastIndexOf(" "));
-                Console.WriteLine(arr);
-                textBox1.Text = arr;
+                Value.mode="dictation";
+                textBox3.Text = Value.mode;
+            }
+            else if (e.Result.Text.IndexOf("exit") >= 0)
+            {
+                if (Value.mode.Equals("dictation"))
+                {
+                    Value.mode = "normal";
+                    textBox3.Text = Value.mode;
+                }
             }
             else
-                textBox1.Text = textBox1.Text + " " + e.Result.Text;
+            {
+                if (Value.mode.Equals("dictation"))
+                {
+                    SendKeys.Send(e.Result.Text);
+                    //Function.dictate(e.Result.Text + " ");    //Function.sendKey(e.Result.Text);
+                }
+                else
+                    textBox1.Text = textBox1.Text + " " + e.Result.Text;
+            }
             textBox2.Text = "Success";
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            /*
+            KeyboardSend.KeyDown(Keys.LWin);
+            KeyboardSend.KeyDown(Keys.E);
+            KeyboardSend.KeyUp(Keys.E);
+            KeyboardSend.KeyUp(Keys.LWin);
+            */
+           
+            //Shell32.Shell shell = new Shell32.Shell();  // Reference Added - Microsoft Shell Controls and Automation
+            //shell.FileRun();
+
+
+            //Process.Start("C:\\Program Files\\Microsoft Games\\Chess\\Chess.exe");
+            //Process.Start("E:\\Music");
             StartRecognition();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (textBox1.Text.IndexOf("write into") >= 0)
-            {
-                string arr = textBox1.Text.Remove(0,textBox1.Text.LastIndexOf(" ")+1);
-                Console.WriteLine(arr);
-                textBox1.Text = arr;
-            }
-            else
-            {
-                Console.WriteLine(textBox1.Text);
-                string arr = textBox1.Text;
-                System.IO.File.WriteAllText(@"E:\vesper.txt", arr);
-                textBox1.Text = "";
-                textBox2.Text = "Success";
-                Morphological m = new Morphological();
-                m.buttonClicked();
-            }
+      //      KeyboardSend.KeyDown(Keys.RButton);
+        //    KeyboardSend.KeyUp(Keys.RButton);
+
+            Console.WriteLine(textBox1.Text);
+            string arr = textBox1.Text;
+            System.IO.File.WriteAllText(@"E:\vesper.txt", arr);
+            textBox1.Text = "";
+            textBox2.Text = "Success";
+            Morphological m = new Morphological();
+            m.buttonClicked();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -154,6 +184,30 @@ namespace WindowsFormsApplication1
         {
             
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Settings s=new Settings();
+            s.ShowDialog();
+        }
     }
-    
+
+    static class KeyboardSend
+    {
+        [DllImport("user32.dll")]
+        private static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+
+        private const int KEYEVENTF_EXTENDEDKEY = 1;
+        private const int KEYEVENTF_KEYUP = 2;
+
+        public static void KeyDown(Keys vKey)
+        {
+            keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        }
+
+        public static void KeyUp(Keys vKey)
+        {
+            keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+        }
+    }
 }

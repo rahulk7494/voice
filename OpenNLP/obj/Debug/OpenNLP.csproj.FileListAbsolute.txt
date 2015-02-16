@@ -10,3 +10,5 @@ C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\Op
 C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\obj\Debug\OpenNLP.dll
 C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\obj\Debug\OpenNLP.pdb
 C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\SharpEntropy.dll
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\OpenNLP.dll.CodeAnalysisLog.xml
+C:\Users\Rahul\Documents\Visual Studio 2012\Projects\WindowsFormsApplication1\OpenNLP\bin\Debug\OpenNLP.dll.lastcodeanalysissucceeded

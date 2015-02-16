@@ -28,7 +28,7 @@ namespace WindowsFormsApplication1
         
         public Morphological()
         {
-            InitializeComponent();
+          //  InitializeComponent();
             
         }
 
@@ -214,7 +214,7 @@ namespace WindowsFormsApplication1
 
             List<string> application = new List<string>();
             List<string> commandList = new List<string>();
-            List<string> applicationList = new List<string>();
+            //List<string> applicationList = new List<string>();
             bool temp = false;
             //string application="";
             Console.WriteLine(len);
@@ -284,7 +284,6 @@ namespace WindowsFormsApplication1
                     {
                         System.Diagnostics.Process.Start(@"" + application[i]);
                     }
-
                 }
                 if (flag1 == 0)
                 {

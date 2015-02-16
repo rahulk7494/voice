@@ -11,27 +11,26 @@ using System.Reflection;
 using System.Text;
 using System.Security.Principal;
 using System.Security.AccessControl;
-
+using Microsoft.Win32;
+using System.Speech.Synthesis;
+using System.Collections;
 
 namespace WindowsFormsApplication1
 {
     class Function
     {
-        static string cs = @"server=localhost;userid=root;password=root;database=voice";
-        static MySqlConnection conn = null;
-        static MySqlDataReader mdr1=null , mdr2=null;
-        static MySqlCommand cmd;
-       
-        List<string> list1 = new List<string>();
-        List<string> list2 = new List<string>();
-        List<string> list3 = new List<string>();
+        static List<string> list1 = new List<string>();
+        static List<string> list2 = new List<string>();
+        static List<string> list3 = new List<string>();
 
-        static string text1="";
-        static string text2;
+        static string text1 = "";
+        static string text2 = "";
         static string methodName;
         static string command;
         static int appId = 0;
 
+        static SpeechSynthesizer synthesizer = new SpeechSynthesizer();
+        
        // int id = 0;
 
         public static void setText(string t)
@@ -44,45 +43,15 @@ namespace WindowsFormsApplication1
             command = c;
         }
 
-        public static void setMethod(string f)
-        {            
-            // Open Database Connection 
-            try
-            {
-                conn = new MySqlConnection(cs);
-                conn.Open();
-
-                string s = "SELECT * FROM command";
-                MySqlCommand cmd = new MySqlCommand(s, conn);
-                mdr1 = cmd.ExecuteReader();
-
-                while (mdr1.Read())
-                {
-                    if (mdr1.GetString(1).Equals(f))
-                    {
-                        methodName = mdr1.GetString(3);
-                        break;
-                    }
-                }
-            }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine("Error : {0}", ex.ToString());
-            }
-            finally
-            {
-                if (mdr1 != null)
-                    mdr1.Close();
-                if (conn != null)
-                    conn.Close();
-            }
-            // Close Database Connection
-
+        public static void callMethod(string f)
+        {
             Type type = typeof(Function);
-            MethodInfo method = type.GetMethod(methodName);         // using System.Reflection;
+            MethodInfo method = type.GetMethod(f);         // using System.Reflection;
             Function c = new Function();
-            method.Invoke(c, null);
-            
+            if (method != null)
+                method.Invoke(c, null);
+            else
+                Console.WriteLine("method not");
         }
 
         [DllImport("user32.dll")]
@@ -109,15 +78,17 @@ namespace WindowsFormsApplication1
         {
             Console.WriteLine("application = "+text1);
             Console.WriteLine("command = "+command);
+            synthesizer.Volume = 100;  // 0...100
+            synthesizer.Rate = -2;     // -10...10
 
             if (!text1.Equals(""))
             {
                 if (caption() == 1)
-                    sendKey(command);
+                    findCommand(command);
                 else
                 {
                     appId = 0;
-                    sendKey(command);
+                    findCommand(command);
                 }
                 
             }
@@ -125,7 +96,8 @@ namespace WindowsFormsApplication1
             {
                 text1 = GetActiveWindow();
                 appId = 0;
-                sendKey(command);                
+                findCommand(command);   
+             
             }
             Console.WriteLine("Active Window : " + text1);
             Value.activeApplication = text1;            
@@ -147,8 +119,48 @@ namespace WindowsFormsApplication1
             info.SetAccessControl(ds);
         }**/
 
+        /*  Write something on VOICE
+         * 
+            IntPtr zero = FindWindow(null, "Form1");
+            SetForegroundWindow(zero);
+            SendKeys.SendWait("Opening .....");
+            SendKeys.Flush();
+
+         */
+         
         public static int searchFile(string text)
         {
+            try
+            {
+                Value.conn = new MySqlConnection(Value.cs);
+                Value.conn.Open();
+
+                string s;
+                s = "SELECT * FROM application";
+                Value.cmd = new MySqlCommand(s, Value.conn);
+                Value.mdr = Value.cmd.ExecuteReader();
+                while (Value.mdr.Read())
+                {
+                    if ((Value.mdr.GetString(1)).ToLower().IndexOf(text.ToLower()) >= 0)
+                    {
+                        Process.Start(Value.mdr.GetString(2));
+                        //  Console.WriteLine("Match Found : Application Id=" + mdr1.GetInt32(0));
+                        return 1;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            finally
+            {
+                if (Value.mdr != null)
+                    Value.mdr = null;
+                if (Value.conn != null)
+                    Value.conn = null;
+            }
+
             string[] name={"Program Files","Program Files (x86)","Windows","Windows\\System32"};
             DirectoryInfo dirInfo;
 
@@ -159,19 +171,42 @@ namespace WindowsFormsApplication1
                     dirInfo = new DirectoryInfo(@"C:\" + s);
                     //SetPermissions(@"C:\"+s);
                     var exeFiles = dirInfo.EnumerateFiles("*.exe", SearchOption.AllDirectories);
+                    //var exeFiles = Directory.GetFiles(@"C:\" + s, "*.exe", SearchOption.AllDirectories);
                     foreach (var exeFile in exeFiles)
                     {
                         //Console.WriteLine(exeFile);
-                        if (exeFile.ToString().IndexOf(text) >= 0)
+                        if (exeFile.ToString().ToLower().IndexOf(text.ToLower())>=0)
                         {
-                            Process.Start("" + exeFile);
+                            Process.Start("" + exeFile.FullName);
                             string str = exeFile.ToString().Remove(exeFile.ToString().IndexOf(".exe"));
                             Value.activeApplication = str;
+                            synthesizer.SpeakAsync(text + " opened");
                             // Console.WriteLine(exeFile);
                             return 1;
                         }
                     }
-                    
+                    /*
+                    Queue queDirsToSearch = new Queue();
+                    queDirsToSearch.Clear();
+                    queDirsToSearch.Enqueue(@"C:\"+s); // Add several of this if you need more than one path
+
+                    while (queDirsToSearch.Count > 0)
+                    {
+                        String curDir = (String)queDirsToSearch.Dequeue();
+                        DirectoryInfo di = new DirectoryInfo(curDir);
+                        FileInfo []files = di.GetFiles("*.exe");
+                        DirectoryInfo []dirs = di.GetDirectories();
+                        foreach (DirectoryInfo di1 in dirs) // Add subdirectory to search que.
+                            queDirsToSearch.Enqueue(di1.FullName);
+                        foreach (FileInfo fi in files)
+                        {
+                            // We've got a file. Let's check if it is what we look for.
+                            Console.WriteLine(fi.Name);
+                            if (fi.Name.ToLower().IndexOf(text.ToLower())>=0)
+                                Process.Start(fi.Name);
+                            }
+                    }
+                    */
                 }
                 catch (System.Exception excpt)
                 {
@@ -188,7 +223,7 @@ namespace WindowsFormsApplication1
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        public void Start(string name, string key)
+        public static void sendKey(string name, string key)
         {
             Console.WriteLine("" + name + "  " + key);
             restore();
@@ -219,8 +254,9 @@ namespace WindowsFormsApplication1
             return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public int caption()
+        public static int caption()
         {
+            int flag = 0;
             string[] tokens = GreedyTokenize(text1);
             Process[] pr = Process.GetProcesses();
             foreach (Process p in pr)
@@ -233,71 +269,102 @@ namespace WindowsFormsApplication1
             foreach (string token in tokens)
             {
                 int count = list1.Count;
-                Console.WriteLine("token =" + token + " app count =" + count);
-                Console.WriteLine("---------------------------");
-                Console.WriteLine("List 1 Contents");
+                //  Console.WriteLine("token =" + token + " app count =" + count);
+                //  Console.WriteLine("---------------------------");
+                //  Console.WriteLine("List 1 Contents");
                 for (int i = 0; i <= count - 1; i++)
                 {
-                    Console.Write(list1[i]+"\t");
+                    //Console.Write(list1[i]+"\t");
                     tokenize(list1[i].ToLower(), token.ToLower(), i);
                 }
                 list1.Clear();
                 list1.AddRange(list3);          // Copy contents of list3 to list1
-                Console.WriteLine("---------------------------");
-                Console.WriteLine("List 3 contents (copied to list 1)");
-                for (int j = 0; j <= list1.Count - 1; j++)
-                    Console.WriteLine(list1[j]);
-                list3.Clear();
+                //  Console.WriteLine("---------------------------");
+                //  Console.WriteLine("List 3 contents (copied to list 1)");
+                list3.Clear();                
             }
             /*for (int a = 0; a < list1.Count; a++)
                 Console.WriteLine(" i=" + a + "  " + list1[a]);*/
             try
             {
-                text1 = list1[0];
-                text2 = (text1.Substring(text1.LastIndexOf("-") + 2, text1.Length - (text1.LastIndexOf("-") + 2))).ToLower();
+                Value.listOfApplication.Clear();
+                for (int j = 0; j <= list1.Count - 1; j++)
+                {
+                    Value.listOfApplication.Add(list1[j]);
+                    flag = 1;
+                    //Console.WriteLine(list1[j]);
+                }
+                //Console.WriteLine(Value.listOfApplication.Count);
+                if (flag == 1)
+                {
+                    if (Value.listOfApplication.Count == 1)
+                        text1 = list1[0];
+                    else
+                    {
+                        ListOfApplication l = new ListOfApplication();
+                        l.ShowDialog();
+                        text1 = Value.activeApplication;
+                    }
+                    //  Console.WriteLine(Value.activeApplication);
+                    text2 = (text1.Substring(text1.LastIndexOf("-") + 2, text1.Length - (text1.LastIndexOf("-") + 2))).ToLower();
+                    list1.Clear();
+                }
             }
             catch (Exception e)
             {
                 Value.status = "Application Not Found";
                 Console.WriteLine(e.ToString());
             }
-            Console.WriteLine("---------------------------");
-            Console.WriteLine("Application  Name = " + text2);        // app name extracted from windows form title
-            
-            try
+            Console.WriteLine("---------------------------  " + flag);
+            //  Console.WriteLine("Application  Name = " + text2);        // app name extracted from windows form title
+            if (flag == 0)
             {
-                conn = new MySqlConnection(cs);
-                conn.Open();
-
-                string s;
-                s = "SELECT * FROM application";
-                cmd = new MySqlCommand(s, conn);
-                mdr1 = cmd.ExecuteReader();
-                while (mdr1.Read())
+                try
                 {
-                    if (mdr1.GetString(1).Equals(text2))
+                    Value.conn = new MySqlConnection(Value.cs);
+                    Value.conn.Open();
+
+                    string s;
+                    s = "SELECT * FROM application";
+                    Value.cmd = new MySqlCommand(s, Value.conn);
+                    Value.mdr = Value.cmd.ExecuteReader();
+                    while (Value.mdr.Read())
                     {
-                        appId = mdr1.GetInt32(0);
-                        Console.WriteLine("Match Found : Application Id=" + mdr1.GetInt32(0));
-                        return 1;
+                        if ((Value.mdr.GetString(1)).ToLower().Equals(text2.ToLower()))
+                        {
+                            appId = Value.mdr.GetInt32(0);
+                            //Console.WriteLine(appId);
+                            //  Console.WriteLine("Match Found : Application Id=" + mdr1.GetInt32(0));
+                            return appId;
+                        }
                     }
                 }
-            }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine("Error : {0}", ex.ToString());
-            }
-            finally
-            {
-                if (mdr1 != null)
-                    mdr1.Close();
-                if (conn != null)
-                    conn.Close();
+                catch (MySqlException ex)
+                {
+                    Console.WriteLine("Error : {0}", ex.ToString());
+                }
+                finally
+                {
+                    if (Value.mdr != null)
+                        Value.mdr.Close();
+                    if (Value.conn != null)
+                        Value.conn.Close();
+                }
             }
             return 0;
         }
-    
-        public void tokenize(string text, string temp, int i)
+
+        public static void dictate(string text)
+        {
+            text1 = Value.activeApplication;
+            if (caption() == 1)
+                sendKey(text1,text);
+            else
+                //  Console.WriteLine("Application not found");
+                synthesizer.SpeakAsync("Application not found");
+        }
+
+        public static void tokenize(string text, string temp, int i)
         {
             string[] tokens = GreedyTokenize(text);
             list2.Clear();
@@ -307,37 +374,53 @@ namespace WindowsFormsApplication1
             }
             int index;
             index = list2.IndexOf(temp);
-            Console.WriteLine(index);
+            //  Console.WriteLine(index);
             if (index >= 0)
                list3.Add(list1[i]);
         }
 
-        public void sendKey(string key)
+        public void findCommand(string key)
         {
-            //caption();
             string action = key;
+            string s;
+            int flag = 0;                   // command found or not
+            
             try
             {
-                conn = new MySqlConnection(cs);
-                conn.Open();
-
-                string s;
+                Value.conn = new MySqlConnection(Value.cs);
+                Value.conn.Open();
                 s = "SELECT * FROM command";
-                cmd = new MySqlCommand(s, conn);
-                mdr2 = cmd.ExecuteReader();
+                Value.cmd = new MySqlCommand(s, Value.conn);
+                Value.mdr = Value.cmd.ExecuteReader();
 
-                while (mdr2.Read())
+                while (Value.mdr.Read())
                 {
-                    if (mdr2.GetInt32(2).Equals(appId))
+                    if (Value.mdr.GetInt32(2).Equals(appId))
                     {
-                        if (mdr2.GetString(1).Equals(key))
+                        if (Value.mdr.GetString(1).ToLower().Equals(key.ToLower()))
                         {
-                            action = mdr2.GetString(3);
-                            Console.WriteLine("Match Found : Command Id=" + mdr2.GetInt32(0));
+                            action = Value.mdr.GetString(3);
+                            Console.WriteLine("Match Found : Command Id=" + Value.mdr.GetInt32(0));
+                            if (action.StartsWith("."))
+                            {
+                                action = action.Remove(0, 1);
+                                callMethod(action);
+                            }
+                            flag = 1;
                             break;
                         }
                     }
+                    else if (Value.mdr.GetInt32(2).Equals(5))
+                    {
+                        //Console.WriteLine(Value.mdr.GetString(3));
+                        if (Value.mdr.GetString(1).ToLower().Equals(key.ToLower()))
+                        {
+                            Process.Start(Value.mdr.GetString(3));
+                            return;
+                        }
+                    }
                 }
+
             }
             catch (MySqlException ex)
             {
@@ -345,12 +428,95 @@ namespace WindowsFormsApplication1
             }
             finally
             {
-                if (mdr2 != null)
-                    mdr2.Close();
-                if (conn != null)
-                    conn.Close();
+                if (Value.mdr != null)
+                    Value.mdr.Close();
+                if (Value.conn != null)
+                    Value.conn.Close();
             }
-            Start(text1, action);            
+            try
+            {    
+                if (flag == 0)
+                {
+                    Value.conn = new MySqlConnection(Value.cs);
+                    Value.conn.Open();
+                    s = "SELECT * FROM command where command_id=(select command_id from synonym where keyword='" + action + "')";
+                    Value.cmd = new MySqlCommand(s, Value.conn);
+                    Value.mdr = Value.cmd.ExecuteReader();
+
+                    if (Value.mdr.Read())
+                    {
+                        action = Value.mdr.GetString(3);
+                        flag = 1;
+                        //  Console.WriteLine("Match Found : Command Id=" + mdr3.GetInt32(0));
+                    }
+                }
+
+                if (flag == 0)
+                {   // Synchronous          synthesizer.Speak("Command not found");
+                    // Asynchronous
+                    synthesizer.SpeakAsync("Command not found");
+                }
+                
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Error : {0}", ex.ToString());
+            }
+            finally
+            {
+                if (Value.mdr != null)
+                    Value.mdr.Close();
+                if (Value.conn != null)
+                    Value.conn.Close();
+            }
+            command = action;
+            sendKey(text1,command);
+        }
+
+        /*public static void sendKey(string key)
+        {
+            //  Console.WriteLine("Active : " + text1 + "\t Text : " + key);
+            sendKey(text1, key);            
+        }*/
+
+        public void uninstall()
+        {
+            string appName = "";
+            string uString = "";
+            string uninstallKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
+            try
+            {
+                using (RegistryKey rk = Registry.LocalMachine.OpenSubKey(uninstallKey))
+                {
+                    foreach (string skName in rk.GetSubKeyNames())
+                    {
+                        if (!skName.StartsWith("{"))
+                        {
+                            using (RegistryKey sk = rk.OpenSubKey(skName))
+                            {
+                                try
+                                {
+                                    appName = sk.GetValue("DisplayName").ToString();
+                                    uString = sk.GetValue("UninstallString").ToString();
+                                    if (appName.ToLower().IndexOf(text1.ToLower()) >= 0)     //row4<row3)
+                                    {
+                                        Console.WriteLine(appName + "  " + uString);  // + " -------------------------- Out of Date");
+                                        break;
+                                    }
+                                }
+                                catch(Exception ex)
+                                {
+                                }
+                            }
+                        }
+                    }
+                }
+                Process.Start(uString);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
         public void shutdown()
@@ -371,7 +537,7 @@ namespace WindowsFormsApplication1
         [DllImport("PowrProf.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool SetSuspendState(bool hibernate, bool forceCritical, bool disableWakeEvent);
 
-        IntPtr hWnd;
+        static IntPtr hWnd;
 
         public void hibernate()
         {
@@ -432,7 +598,7 @@ namespace WindowsFormsApplication1
             }
         }
 
-        public void restore()
+        public static void restore()
         {
             hWnd = FindWindowByCaption(IntPtr.Zero, text1);
             if (!hWnd.Equals(IntPtr.Zero))

@@ -55,13 +55,13 @@
   </dependency>
   <dependency>
     <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="OpenNLP.dll" size="98304">
-      <assemblyIdentity name="OpenNLP" version="1.0.5507.21989" language="neutral" processorArchitecture="msil" />
+      <assemblyIdentity name="OpenNLP" version="1.0.5524.5077" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>WzLqRgasVqiBh3jPy2JVd0iAUVVcf8z9LhLipBDvHIc=</dsig:DigestValue>
+        <dsig:DigestValue>1q3Soka7ipV0/gMwlmj8eolEb/okTIevIE7ZsBVdRZI=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -78,17 +78,26 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WindowsFormsApplication1.exe" size="37376">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WindowsFormsApplication1.exe" size="76800">
       <assemblyIdentity name="WindowsFormsApplication1" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>x/mr89ZxK51gFJDr9LG30UI4UsrijV9XrnSO5ErVSMw=</dsig:DigestValue>
+        <dsig:DigestValue>+9pu1yQM7Z0PsnvUwBAlyUQvBTH89T+a14c/DPG/0L8=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
+  <file name="Resources\voice.jpg" size="3696">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>/h2SXvzakBF/70dLFGUOCYPwzCDt8pgKCf70E4JYKWI=</dsig:DigestValue>
+    </hash>
+  </file>
   <file name="WindowsFormsApplication1.exe.config" size="583">
     <hash>
       <dsig:Transforms>
