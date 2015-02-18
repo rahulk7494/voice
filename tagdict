@@ -2115,7 +2115,7 @@ late JJ RB
 lately RB
 later JJ RBR RB
 latest JJS
-launch NN VB
+launch VB
 launched VBN VBD
 Laurel NNP
 law NN
@@ -3482,7 +3482,7 @@ stands VBZ NNS
 Stanley NNP
 Stanza NNP
 Star NNP
-start NN VBP VB
+start VB
 started VBN VBD
 starting NN JJ VBG
 State NN NNP
@@ -4080,3 +4080,5 @@ your PRP$
 Your PRP$
 yourself PRP
 Zealand NNP
+uninstall VB
+install VB
