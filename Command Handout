@@ -1,0 +1,12 @@
+open/start/launch  	application_name
+	    problem =>  same name exe is executed
+	
+restart/shutdown/sleep/logoff/hibernate
+
+uninstall   	application_name
+	    problem => 1.	if application is open (due to caption() function , text1 changes)
+		       2.	if application is not present in windows registry
+
+Command_name	(executed on the active window or previously active application)
+
+Voice settings

@@ -8,3 +8,9 @@ Version 2.1
 Version 3.0
   - Integrated SAPI with VOICE
   - Upto Two words listens continuously
+
+Version 4.0
+  - Uninstallation via VOICE
+  - Settings window added
+  - Addition of custom command
+  - Editing of command (incomplete)
