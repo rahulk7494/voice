@@ -216,7 +216,7 @@ namespace WindowsFormsApplication1
             List<string> commandList = new List<string>();
             //List<string> applicationList = new List<string>();
             bool temp = false;
-            //string application="";
+            string app="";
             Console.WriteLine(len);
             for (i = 0; i < len; i++)
             {
@@ -229,10 +229,10 @@ namespace WindowsFormsApplication1
                     for (p = i + 1; p < len; p++)
                     {
                         if (arr5[p].Equals("NNS") || arr5[p].Equals("NN"))
-                            application.Add(arr6[p]);
+                            app = app +" "+ arr6[p];    //application.Add(arr6[p]);
                         else
                         {
-                            application.Add("");
+                            //application.Add("");
                             break;
                         }
                     }
@@ -241,7 +241,7 @@ namespace WindowsFormsApplication1
                 {
                     commandList.Add(arr6[k]);
                 }
-
+                application.Add(app);
                 z++;
                 i = p;
                 Console.WriteLine(i);
@@ -270,10 +270,10 @@ namespace WindowsFormsApplication1
                     Console.WriteLine(Value.activeApplication);
                     application.Add(Value.activeApplication);
                 }
-                Console.WriteLine(commandList[i]);
-                Console.WriteLine(application[application.Count-1]);
+                Console.WriteLine("Com => " + commandList[i]);
+                Console.WriteLine("App => " + application[application.Count - 1]);
 
-                if (commandList[i].Equals("open"))
+                if (commandList[i].ToLower().Equals("open") || commandList[i].ToLower().Equals("start") || commandList[i].ToLower().Equals("launch"))
                 {
                     if (flag1 == 0)
                     {

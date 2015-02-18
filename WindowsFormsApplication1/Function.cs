@@ -25,9 +25,10 @@ namespace WindowsFormsApplication1
 
         static string text1 = "";
         static string text2 = "";
-        static string methodName;
+        //static string methodName;
         static string command;
         static int appId = 0;
+        Boolean uninst;
 
         static SpeechSynthesizer synthesizer = new SpeechSynthesizer();
         
@@ -76,6 +77,7 @@ namespace WindowsFormsApplication1
 
         public void main()
         {
+            uninst = false;
             Console.WriteLine("application = "+text1);
             Console.WriteLine("command = "+command);
             synthesizer.Volume = 100;  // 0...100
@@ -100,24 +102,11 @@ namespace WindowsFormsApplication1
              
             }
             Console.WriteLine("Active Window : " + text1);
-            Value.activeApplication = text1;            
+            if (uninst == true)
+                Value.activeApplication = "";
+            else
+                Value.activeApplication = text1;            
         }
-
-        List<string> list4 = new List<string>();
-
-       /* private static void SetPermissions(string dirPath)
-        {
-            DirectoryInfo info = new DirectoryInfo(dirPath);
-            WindowsIdentity self = System.Security.Principal.WindowsIdentity.GetCurrent();
-            DirectorySecurity ds = info.GetAccessControl();
-            ds.AddAccessRule(new FileSystemAccessRule(self.Name,
-            FileSystemRights.FullControl,
-            InheritanceFlags.ObjectInherit |
-            InheritanceFlags.ContainerInherit,
-            PropagationFlags.None,
-            AccessControlType.Allow));
-            info.SetAccessControl(ds);
-        }**/
 
         /*  Write something on VOICE
          * 
@@ -130,6 +119,7 @@ namespace WindowsFormsApplication1
          
         public static int searchFile(string text)
         {
+            text = text.Remove(0, 1);               // due to application name in morphological.cs
             try
             {
                 Value.conn = new MySqlConnection(Value.cs);
@@ -161,6 +151,8 @@ namespace WindowsFormsApplication1
                     Value.conn = null;
             }
 
+            Console.WriteLine("Not Present in database");
+
             string[] name={"Program Files","Program Files (x86)","Windows","Windows\\System32"};
             DirectoryInfo dirInfo;
 
@@ -175,38 +167,18 @@ namespace WindowsFormsApplication1
                     foreach (var exeFile in exeFiles)
                     {
                         //Console.WriteLine(exeFile);
-                        if (exeFile.ToString().ToLower().IndexOf(text.ToLower())>=0)
+                        if (exeFile.ToString().ToLower().IndexOf(text.ToLower()) >= 0)
                         {
+                            Console.WriteLine("Present in " + s);
                             Process.Start("" + exeFile.FullName);
                             string str = exeFile.ToString().Remove(exeFile.ToString().IndexOf(".exe"));
                             Value.activeApplication = str;
                             synthesizer.SpeakAsync(text + " opened");
-                            // Console.WriteLine(exeFile);
+                            Console.WriteLine(exeFile.FullName);
                             return 1;
                         }
                     }
-                    /*
-                    Queue queDirsToSearch = new Queue();
-                    queDirsToSearch.Clear();
-                    queDirsToSearch.Enqueue(@"C:\"+s); // Add several of this if you need more than one path
-
-                    while (queDirsToSearch.Count > 0)
-                    {
-                        String curDir = (String)queDirsToSearch.Dequeue();
-                        DirectoryInfo di = new DirectoryInfo(curDir);
-                        FileInfo []files = di.GetFiles("*.exe");
-                        DirectoryInfo []dirs = di.GetDirectories();
-                        foreach (DirectoryInfo di1 in dirs) // Add subdirectory to search que.
-                            queDirsToSearch.Enqueue(di1.FullName);
-                        foreach (FileInfo fi in files)
-                        {
-                            // We've got a file. Let's check if it is what we look for.
-                            Console.WriteLine(fi.Name);
-                            if (fi.Name.ToLower().IndexOf(text.ToLower())>=0)
-                                Process.Start(fi.Name);
-                            }
-                    }
-                    */
+                    Console.WriteLine("Not Present in " + s);
                 }
                 catch (System.Exception excpt)
                 {
@@ -405,6 +377,7 @@ namespace WindowsFormsApplication1
                             {
                                 action = action.Remove(0, 1);
                                 callMethod(action);
+                                return;
                             }
                             flag = 1;
                             break;
@@ -498,7 +471,9 @@ namespace WindowsFormsApplication1
                                 {
                                     appName = sk.GetValue("DisplayName").ToString();
                                     uString = sk.GetValue("UninstallString").ToString();
-                                    if (appName.ToLower().IndexOf(text1.ToLower()) >= 0)     //row4<row3)
+                                    string t1 = text1.Replace(" ", "");
+                                    string t2 = appName.Replace(" ", "");
+                                    if (t2.ToLower().IndexOf(t1.ToLower()) >= 0)     //row4<row3)
                                     {
                                         Console.WriteLine(appName + "  " + uString);  // + " -------------------------- Out of Date");
                                         break;
@@ -512,6 +487,7 @@ namespace WindowsFormsApplication1
                     }
                 }
                 Process.Start(uString);
+                uninst = true;
             }
             catch (Exception e)
             {

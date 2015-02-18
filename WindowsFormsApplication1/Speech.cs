@@ -105,6 +105,12 @@ namespace WindowsFormsApplication1
                 Morphological m = new Morphological();
                 m.buttonClicked();
             }
+            else if (e.Result.Text.IndexOf("voice settings") >= 0)
+            {
+                Console.WriteLine(textBox1.Text);
+                Settings s = new Settings();
+                s.ShowDialog();
+            }
             else if (e.Result.Text.IndexOf("backspace") >= 0)
             {
                 Console.WriteLine(textBox1.Text);
@@ -143,21 +149,57 @@ namespace WindowsFormsApplication1
             textBox2.Text = "Success";
         }
 
+
+        [DllImport("user32.dll")]
+        static extern int GetForegroundWindow();
+        [DllImport("user32.dll")]
+        static extern int GetWindowText(int hWnd, StringBuilder text, int count);
+
+        public string GetActiveWindow()
+        {
+            const int nChars = 256;
+            int handle = 0;
+            StringBuilder buff = new StringBuilder(nChars);
+            handle = GetForegroundWindow();
+            if (GetWindowText(handle, buff, nChars) > 0)
+            {
+                string text1 = buff.ToString();
+                Value.activeApplication = text1;
+                return text1;
+            }
+            return null;
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             /*
             KeyboardSend.KeyDown(Keys.LWin);
-            KeyboardSend.KeyDown(Keys.E);
-            KeyboardSend.KeyUp(Keys.E);
+            //KeyboardSend.KeyDown(Keys.E);
+            //KeyboardSend.KeyUp(Keys.E);
             KeyboardSend.KeyUp(Keys.LWin);
-            */
-           
+            /*Thread.Sleep(500);
+            string t = GetActiveWindow();
+            Thread.Sleep(500);
+            KeyboardSend.KeyDown(Keys.Right);
+            KeyboardSend.KeyUp(Keys.Right);
+            Thread.Sleep(500);
+            SendKeys.SendWait("avg");
+            SendKeys.SendWait("{ENTER}");
+
+            //KeyboardSend.KeyDown(Keys.Shift);
+            //KeyboardSend.KeyDown(Keys.F10);
+            //KeyboardSend.KeyUp(Keys.F10);
+            //KeyboardSend.KeyUp(Keys.Shift);
+            //Console.WriteLine(t);
+            
             //Shell32.Shell shell = new Shell32.Shell();  // Reference Added - Microsoft Shell Controls and Automation
             //shell.FileRun();
 
 
             //Process.Start("C:\\Program Files\\Microsoft Games\\Chess\\Chess.exe");
             //Process.Start("E:\\Music");
+             * 
+             */
             StartRecognition();
         }
 
