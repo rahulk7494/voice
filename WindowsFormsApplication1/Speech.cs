@@ -219,10 +219,10 @@ namespace WindowsFormsApplication1
             //Process.Start("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup");
                 
             
-            KeyboardSend.KeyDown(Keys.LWin);
-            KeyboardSend.KeyDown(Keys.D);
-            KeyboardSend.KeyUp(Keys.D);
-            KeyboardSend.KeyUp(Keys.LWin);
+            //KeyboardSend.KeyDown(Keys.LWin);
+            //KeyboardSend.KeyDown(Keys.D);
+            //KeyboardSend.KeyUp(Keys.D);
+            //KeyboardSend.KeyUp(Keys.LWin);
             /*Thread.Sleep(500);
             string t = GetActiveWindow();
             Thread.Sleep(500);
@@ -246,7 +246,7 @@ namespace WindowsFormsApplication1
             //Process.Start("E:\\Music");
              * 
              */
-            //StartRecognition();
+            StartRecognition();
         }
 
         private void button2_Click(object sender, EventArgs e)

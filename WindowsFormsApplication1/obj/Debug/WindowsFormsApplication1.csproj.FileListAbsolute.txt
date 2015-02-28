@@ -136,3 +136,8 @@ D:\VOICE\Test\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\bin
 D:\VOICE\Test\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.TrustInfo.xml
 D:\VOICE\Test\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe.manifest
 D:\VOICE\Test\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.application
+D:\VOICE\Major Project\Version 5.1\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+D:\VOICE\Major Project\Version 5.1\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\obj\Debug\Interop.Shell32.dll
+D:\VOICE\Major Project\Version 5.1\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.ResolveComReference.cache
+D:\VOICE\Major Project\Version 5.1\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+D:\VOICE\Major Project\Version 5.1\WindowsFormsApplication1 - Explorer_2\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
