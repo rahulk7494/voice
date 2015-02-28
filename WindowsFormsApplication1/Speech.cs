@@ -58,8 +58,10 @@ namespace WindowsFormsApplication1
             
             var combinations = Combinations(0, 2);
             foreach (var item in combinations)
+            {
                 s.Add(item.ToString());
-            
+                //Console.WriteLine(item);
+            }
             string []l = s.ToArray();
 
             textBox2.Text = "Starting recognition ....";
@@ -149,33 +151,77 @@ namespace WindowsFormsApplication1
             textBox2.Text = "Success";
         }
 
-
-        [DllImport("user32.dll")]
-        static extern int GetForegroundWindow();
-        [DllImport("user32.dll")]
-        static extern int GetWindowText(int hWnd, StringBuilder text, int count);
-
-        public string GetActiveWindow()
+        enum RecycleFlag : int
         {
-            const int nChars = 256;
-            int handle = 0;
-            StringBuilder buff = new StringBuilder(nChars);
-            handle = GetForegroundWindow();
-            if (GetWindowText(handle, buff, nChars) > 0)
-            {
-                string text1 = buff.ToString();
-                Value.activeApplication = text1;
-                return text1;
-            }
-            return null;
+            SHERB_NOCONFIRMATION = 0x00000001, // No confirmation, when emptying
+            SHERB_NOPROGRESSUI = 0x00000001, // No progress tracking window during the emptying of the recycle bin
+            SHERB_NOSOUND = 0x00000004 // No sound when the emptying of the recycle bin is complete
         }
+
+        [DllImport("Shell32.dll")]
+        static extern int SHEmptyRecycleBin(IntPtr hwnd, string pszRootPath, RecycleFlag dwFlags);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool CloseHandle(IntPtr handle);
+
+        [DllImport("psapi.dll")]
+        private static extern uint GetModuleFileNameEx(IntPtr hWnd, IntPtr hModule, StringBuilder lpFileName, int nSize);
+
+        public static string GetTopWindowText()
+        {
+            IntPtr hWnd = GetForegroundWindow();
+            int length = GetWindowTextLength(hWnd);
+            StringBuilder text = new StringBuilder(length + 1);
+            GetWindowText(hWnd, text, text.Capacity);
+            return text.ToString();
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        public static string GetTopWindowName()
+        {
+
+            IntPtr hWnd = FindWindow(null, "Computer");// GetForegroundWindow();
+            uint lpdwProcessId;
+            GetWindowThreadProcessId(hWnd, out lpdwProcessId);
+
+            IntPtr hProcess = OpenProcess(0x0410, false, lpdwProcessId);
+
+            StringBuilder text = new StringBuilder(1000);
+            GetModuleFileNameEx(hProcess, IntPtr.Zero, text, text.Capacity);
+
+            CloseHandle(hProcess);
+
+            return text.ToString();
+        }
+
 
         private void button1_Click(object sender, EventArgs e)
         {
-            /*
+            
+            //SHEmptyRecycleBin(IntPtr.Zero, null, RecycleFlag.SHERB_NOSOUND);
+            //Process.Start("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup");
+                
+            
             KeyboardSend.KeyDown(Keys.LWin);
-            //KeyboardSend.KeyDown(Keys.E);
-            //KeyboardSend.KeyUp(Keys.E);
+            KeyboardSend.KeyDown(Keys.D);
+            KeyboardSend.KeyUp(Keys.D);
             KeyboardSend.KeyUp(Keys.LWin);
             /*Thread.Sleep(500);
             string t = GetActiveWindow();
@@ -200,14 +246,16 @@ namespace WindowsFormsApplication1
             //Process.Start("E:\\Music");
              * 
              */
-            StartRecognition();
+            //StartRecognition();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
       //      KeyboardSend.KeyDown(Keys.RButton);
         //    KeyboardSend.KeyUp(Keys.RButton);
-
+            Console.WriteLine();
+            Console.WriteLine("===================================================================================================================");
+            Console.WriteLine(); 
             Console.WriteLine(textBox1.Text);
             string arr = textBox1.Text;
             System.IO.File.WriteAllText(@"E:\vesper.txt", arr);

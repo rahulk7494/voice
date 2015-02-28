@@ -10,6 +10,7 @@ namespace WindowsFormsApplication1
     public static class Value
     {
         public static string activeApplication = "";
+        public static int appId = 0;
         public static string status = "";
         public static List<string> listOfApplication = new List<string>();
         public static string mode = "normal";
@@ -17,5 +18,8 @@ namespace WindowsFormsApplication1
         public static MySqlConnection conn = null;
         public static MySqlDataReader mdr = null;
         public static MySqlCommand cmd;
+        public static bool rfound = false;
+        //public static bool doMorpho = true;
+        
     }
 }

@@ -27,13 +27,11 @@ namespace WindowsFormsApplication1
         static string text2 = "";
         //static string methodName;
         static string command;
-        static int appId = 0;
+        //static int Value.appId = 0;
         Boolean uninst;
 
         static SpeechSynthesizer synthesizer = new SpeechSynthesizer();
-        
-       // int id = 0;
-
+      
         public static void setText(string t)
         {
             text1 = t;
@@ -55,6 +53,7 @@ namespace WindowsFormsApplication1
                 Console.WriteLine("method not");
         }
 
+        /*
         [DllImport("user32.dll")]
         static extern int GetForegroundWindow();
         [DllImport("user32.dll")]
@@ -74,10 +73,45 @@ namespace WindowsFormsApplication1
             }
             return null;
         }
+        */
+        public int setApplicationName()
+        {
+            Console.WriteLine("------------------ setApplicationName() --------------------");
+            try
+            {
+                Value.conn = new MySqlConnection(Value.cs);
+                Value.conn.Open();
+
+                string s;
+                s = "SELECT * FROM application where application_id=" + Value.appId;
+                //Console.WriteLine(s);
+                Value.cmd = new MySqlCommand(s, Value.conn);
+                Value.mdr = Value.cmd.ExecuteReader();
+                if (Value.mdr.Read())
+                {
+                    text1 = Value.mdr.GetString(1);
+                    Console.WriteLine("Match Found : Application Id=" + Value.mdr.GetInt32(0));
+                    return 1;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            finally
+            {
+                if (Value.mdr != null)
+                    Value.mdr = null;
+                if (Value.conn != null)
+                    Value.conn = null;
+            }
+            return 0;
+        }
 
         public void main()
         {
             uninst = false;
+            Console.WriteLine("---------------- main() -------------------");
             Console.WriteLine("application = "+text1);
             Console.WriteLine("command = "+command);
             synthesizer.Volume = 100;  // 0...100
@@ -89,16 +123,27 @@ namespace WindowsFormsApplication1
                     findCommand(command);
                 else
                 {
-                    appId = 0;
+                    Value.appId = 0;
                     findCommand(command);
                 }
-                
             }
             else
             {
-                text1 = GetActiveWindow();
-                appId = 0;
-                findCommand(command);   
+                text1 = Value.activeApplication;//GetActiveWindow();
+                if (setApplicationName() == 1)
+                {
+                    Console.WriteLine("555555555    "+Value.appId + "\t" + text1);
+                    if (caption() == 1)
+                        findCommand(command);
+                    else
+                    {
+                        Value.appId = 0;
+                        findCommand(command);
+                    }
+                }
+                Console.WriteLine(Value.appId + "\t" + text1);
+                //Value.appId = 0;
+                //findCommand(command);   
              
             }
             Console.WriteLine("Active Window : " + text1);
@@ -116,10 +161,13 @@ namespace WindowsFormsApplication1
             SendKeys.Flush();
 
          */
-         
+ 
         public static int searchFile(string text)
         {
+            Console.WriteLine("---------------- searchFile() -------------------");
+            Console.WriteLine("Input : " + text);
             text = text.Remove(0, 1);               // due to application name in morphological.cs
+            Console.WriteLine(text);
             try
             {
                 Value.conn = new MySqlConnection(Value.cs);
@@ -134,7 +182,10 @@ namespace WindowsFormsApplication1
                     if ((Value.mdr.GetString(1)).ToLower().IndexOf(text.ToLower()) >= 0)
                     {
                         Process.Start(Value.mdr.GetString(2));
-                        //  Console.WriteLine("Match Found : Application Id=" + mdr1.GetInt32(0));
+                        Value.appId = Value.mdr.GetInt32(0);
+                        Value.activeApplication = Value.mdr.GetString(1);
+                        Console.WriteLine("Match Found : Application Id   = " + Value.appId);
+                        Console.WriteLine("Match Found : Application Name = " + Value.activeApplication);
                         return 1;
                     }
                 }
@@ -150,7 +201,38 @@ namespace WindowsFormsApplication1
                 if (Value.conn != null)
                     Value.conn = null;
             }
+            try
+            {
+                Value.conn = new MySqlConnection(Value.cs);
+                Value.conn.Open();
 
+                string s;
+                s = "SELECT * FROM command WHERE application_id=5";
+                Value.cmd = new MySqlCommand(s, Value.conn);
+                Value.mdr = Value.cmd.ExecuteReader();
+                while (Value.mdr.Read())
+                {
+                    Console.WriteLine(Value.mdr.GetString(1).ToLower() + "\t^" + text.ToLower());
+                    if ((Value.mdr.GetString(1)).ToLower().IndexOf(text.ToLower()) >= 0)
+                    {
+                        Process.Start(Value.mdr.GetString(3));
+                        Value.appId = Value.mdr.GetInt32(2);
+                        Console.WriteLine("Match Found : Command Id=" + Value.mdr.GetInt32(0));
+                        return 1;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            finally
+            {
+                if (Value.mdr != null)
+                    Value.mdr = null;
+                if (Value.conn != null)
+                    Value.conn = null;
+            }
             Console.WriteLine("Not Present in database");
 
             string[] name={"Program Files","Program Files (x86)","Windows","Windows\\System32"};
@@ -197,8 +279,13 @@ namespace WindowsFormsApplication1
 
         public static void sendKey(string name, string key)
         {
-            Console.WriteLine("" + name + "  " + key);
+            Value.activeApplication = name;
+            Console.WriteLine("---------------- sendKey() -------------------");
+            Console.WriteLine("Input text1=" + Value.activeApplication + " key=" + key);
+            
             restore();
+            //maximize();
+            
             IntPtr zero = IntPtr.Zero;
             for (int i = 0; (i < 60) && (zero == IntPtr.Zero); i++)
             {
@@ -226,18 +313,89 @@ namespace WindowsFormsApplication1
             return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public static int caption()
+        public delegate bool WindowEnumCallback(int hwnd, int lparam);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool EnumWindows(WindowEnumCallback lpEnumFunc, int lParam);
+
+        [DllImport("user32.dll")]
+        public static extern void GetWindowText(int h, StringBuilder s, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(int h);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool CloseHandle(IntPtr handle);
+
+        [DllImport("psapi.dll")]
+        private static extern uint GetModuleFileNameEx(IntPtr hWnd, IntPtr hModule, StringBuilder lpFileName, int nSize);
+
+        private List<string> Windows = new List<string>();
+
+        private bool AddWnd(int hwnd, int lparam)
         {
+            if (IsWindowVisible(hwnd))
+            {
+                StringBuilder sb = new StringBuilder(255);
+                GetWindowText(hwnd, sb, sb.Capacity);
+                Windows.Add(sb.ToString());
+            }
+            return true;
+        }
+
+        public static string GetTopWindowName(string s)
+        {
+            IntPtr hWnd = FindWindow(null, s);
+            uint lpdwProcessId;
+            GetWindowThreadProcessId(hWnd, out lpdwProcessId);
+            IntPtr hProcess = OpenProcess(0x0410, false, lpdwProcessId);
+            StringBuilder text = new StringBuilder(1000);
+            GetModuleFileNameEx(hProcess, IntPtr.Zero, text, text.Capacity);
+            CloseHandle(hProcess);
+            return text.ToString();
+        }
+
+        public void getActiveWindows()
+        {
+            list1.Clear();
+            int i = 0;
+            EnumWindows(new WindowEnumCallback(this.AddWnd), 0);
+            foreach (string s in Windows)
+            {
+                if (!String.IsNullOrEmpty(s) && !s.Equals("Start") && !s.Equals("Program Manager"))
+                {
+                    list1.Add(s);
+                    Console.WriteLine("{0} {1} {2}", ++i, s, GetTopWindowName(s));
+                }
+            }
+        
+        }
+
+        public int caption()
+        {
+            Console.WriteLine("---------------- caption() -------------------");
+            Console.WriteLine("Input text1=" + text1);
             int flag = 0;
             string[] tokens = GreedyTokenize(text1);
+            //getActiveWindows();
+            
             Process[] pr = Process.GetProcesses();
             foreach (Process p in pr)
             {
-                if (!(string.IsNullOrEmpty(p.MainWindowTitle)))
+                if (!(string.IsNullOrEmpty(p.MainWindowTitle)) || p.ProcessName.Equals("explorer"))
                 {
                     list1.Add(p.MainWindowTitle);
+                    //Console.WriteLine("Process: {0} ID: {1} Window title: {2}", p.ProcessName, p.Id, p.MainWindowTitle);
                 }
             }
+            
             foreach (string token in tokens)
             {
                 int count = list1.Count;
@@ -266,7 +424,7 @@ namespace WindowsFormsApplication1
                     flag = 1;
                     //Console.WriteLine(list1[j]);
                 }
-                //Console.WriteLine(Value.listOfApplication.Count);
+                Console.WriteLine(Value.listOfApplication.Count);
                 if (flag == 1)
                 {
                     if (Value.listOfApplication.Count == 1)
@@ -277,19 +435,25 @@ namespace WindowsFormsApplication1
                         l.ShowDialog();
                         text1 = Value.activeApplication;
                     }
-                    //  Console.WriteLine(Value.activeApplication);
-                    text2 = (text1.Substring(text1.LastIndexOf("-") + 2, text1.Length - (text1.LastIndexOf("-") + 2))).ToLower();
+                    Console.WriteLine(Value.activeApplication);
+        //--------------------------------------------------------------------------------------------------------------------------------        
+                    if (text1.LastIndexOf("-") >= 0)
+                        text2 = (text1.Substring(text1.LastIndexOf("-") + 2, text1.Length - (text1.LastIndexOf("-") + 2))).ToLower();
+                    else
+                        text2 = (text1.Substring(text1.LastIndexOf("-") + 1, text1.Length - (text1.LastIndexOf("-") + 1))).ToLower();
+        //--------------------------------------------------------------------------------------------------------------------------------
                     list1.Clear();
+                    
                 }
+                return 1;
             }
             catch (Exception e)
             {
                 Value.status = "Application Not Found";
                 Console.WriteLine(e.ToString());
             }
-            Console.WriteLine("---------------------------  " + flag);
-            //  Console.WriteLine("Application  Name = " + text2);        // app name extracted from windows form title
-            if (flag == 0)
+           
+            /*if (flag == 0)
             {
                 try
                 {
@@ -302,19 +466,20 @@ namespace WindowsFormsApplication1
                     Value.mdr = Value.cmd.ExecuteReader();
                     while (Value.mdr.Read())
                     {
+                        //Console.WriteLine("{0} => {1}", (Value.mdr.GetString(1)).ToLower(), text2.ToLower());
                         if ((Value.mdr.GetString(1)).ToLower().Equals(text2.ToLower()))
                         {
-                            appId = Value.mdr.GetInt32(0);
-                            //Console.WriteLine(appId);
-                            //  Console.WriteLine("Match Found : Application Id=" + mdr1.GetInt32(0));
-                            return appId;
+                            Value.appId = Value.mdr.GetInt32(0);
+                            //Console.WriteLine(Value.appId);
+                            Console.WriteLine("Match Found : Application Id=" + Value.mdr.GetInt32(0));
+                            return Value.appId;
                         }
                     }
                 }
                 catch (MySqlException ex)
                 {
                     Console.WriteLine("Error : {0}", ex.ToString());
-                }
+                }*/
                 finally
                 {
                     if (Value.mdr != null)
@@ -322,11 +487,13 @@ namespace WindowsFormsApplication1
                     if (Value.conn != null)
                         Value.conn.Close();
                 }
-            }
+                //Console.WriteLine("---------------------------  " + flag);
+                //Console.WriteLine("Application  Name = " + text1);        // app name extracted from windows form title
+     
             return 0;
         }
 
-        public static void dictate(string text)
+   /*     public static void dictate(string text)
         {
             text1 = Value.activeApplication;
             if (caption() == 1)
@@ -335,7 +502,7 @@ namespace WindowsFormsApplication1
                 //  Console.WriteLine("Application not found");
                 synthesizer.SpeakAsync("Application not found");
         }
-
+        */
         public static void tokenize(string text, string temp, int i)
         {
             string[] tokens = GreedyTokenize(text);
@@ -353,40 +520,48 @@ namespace WindowsFormsApplication1
 
         public void findCommand(string key)
         {
+            Console.WriteLine("---------------- findCommand() -------------------");
+            Console.WriteLine("Input text1=" + text1 + " key=" + key + " AppId=" + Value.appId);
             string action = key;
             string s;
             int flag = 0;                   // command found or not
-            
+            //Console.WriteLine(text1);
             try
             {
                 Value.conn = new MySqlConnection(Value.cs);
                 Value.conn.Open();
-                s = "SELECT * FROM command";
+                s = "SELECT * FROM command where application_id=" + Value.appId + " OR application_id=5";
                 Value.cmd = new MySqlCommand(s, Value.conn);
                 Value.mdr = Value.cmd.ExecuteReader();
-
+                //Console.WriteLine(action);
+                if(!action.Equals(" "))
+                    action = action.Remove(0, 1);
+                
                 while (Value.mdr.Read())
                 {
-                    if (Value.mdr.GetInt32(2).Equals(appId))
+                    //Console.WriteLine(Value.mdr.GetInt32(2) + " ^" + Value.mdr.GetString(1).ToLower() + "^ " + Value.appId + " ^" + action + "^");
+                    if ((Value.mdr.GetString(1).ToLower().IndexOf(action.ToLower()) >= 0) && !(action.Equals("")))
                     {
-                        if (Value.mdr.GetString(1).ToLower().Equals(key.ToLower()))
+                        action = Value.mdr.GetString(3);
+                        Console.WriteLine("Match Found : Command Id=" + Value.mdr.GetInt32(0));
+                        if (action.StartsWith("."))
                         {
-                            action = Value.mdr.GetString(3);
-                            Console.WriteLine("Match Found : Command Id=" + Value.mdr.GetInt32(0));
-                            if (action.StartsWith("."))
-                            {
-                                action = action.Remove(0, 1);
-                                callMethod(action);
-                                return;
-                            }
-                            flag = 1;
-                            break;
+                            action = action.Remove(0, 1);
+                            callMethod(action);
+                            return;
                         }
+                        flag = 1;
+                        break;
                     }
-                    else if (Value.mdr.GetInt32(2).Equals(5))
+                    if (Value.mdr.GetInt32(2).Equals(5))
                     {
                         //Console.WriteLine(Value.mdr.GetString(3));
-                        if (Value.mdr.GetString(1).ToLower().Equals(key.ToLower()))
+                        if (Value.mdr.GetString(1).ToLower().Equals(action.ToLower()))
+                        {
+                            Process.Start(Value.mdr.GetString(3));
+                            return;
+                        }
+                        else if ((" "+Value.mdr.GetString(1).ToLower()).Equals(text1.ToLower()))
                         {
                             Process.Start(Value.mdr.GetString(3));
                             return;
@@ -446,11 +621,29 @@ namespace WindowsFormsApplication1
             sendKey(text1,command);
         }
 
-        /*public static void sendKey(string key)
+        public void sendCommand(string key)
         {
-            //  Console.WriteLine("Active : " + text1 + "\t Text : " + key);
-            sendKey(text1, key);            
-        }*/
+            Console.WriteLine("---------------- sendCommand() -------------------");
+            Console.WriteLine("Input text1=" + Value.activeApplication + " key=" + key);
+            text1 = Value.activeApplication;
+            caption();
+            sendKey(text1, key);
+            
+        /*    if(!text1.Equals(""))
+            {
+                    sendKey(text1, key);                
+            }
+            else
+            {
+                if (setApplicationName() == 1)
+                {
+                    Console.WriteLine("888888888    " + Value.appId + "\t" + text1);
+                    if (caption() == 1)
+                        sendKey(text1, key);                
+                }
+                Console.WriteLine(Value.appId + "\t" + text1);            
+            }*/
+        }
 
         public void uninstall()
         {
@@ -495,6 +688,109 @@ namespace WindowsFormsApplication1
             }
         }
 
+        public void hidden()
+        {
+            RegistryKey key = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced");
+            if (key != null)
+            {
+                if (key.GetValue("Hidden").ToString() == "1")
+                    key.SetValue("Hidden", 2);                  // Hide
+                else
+                    key.SetValue("Hidden", 1);                  // Show
+            }
+
+            Guid CLSID_ShellApplication = new Guid("13709620-C279-11CE-A49E-444553540000");
+            Type shellApplicationType = Type.GetTypeFromCLSID(CLSID_ShellApplication, true);
+            object shellApplication = Activator.CreateInstance(shellApplicationType);
+            object windows = shellApplicationType.InvokeMember("Windows", System.Reflection.BindingFlags.InvokeMethod, null, shellApplication, new object[] { });
+            Type windowsType = windows.GetType();
+            object count = windowsType.InvokeMember("Count", System.Reflection.BindingFlags.GetProperty, null, windows, null);
+            for (int i = 0; i < (int)count; i++)
+            {
+                object item = windowsType.InvokeMember("Item", System.Reflection.BindingFlags.InvokeMethod, null, windows, new object[] { i });
+                Type itemType = item.GetType();
+
+                string itemName = (string)itemType.InvokeMember("Name", System.Reflection.BindingFlags.GetProperty, null, item, null);
+                if (itemName == "Windows Explorer")
+                {
+                    itemType.InvokeMember("Refresh", System.Reflection.BindingFlags.InvokeMethod, null, item, null);
+                }
+            }
+        }
+
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetForegroundWindow();
+
+        //[DllImport("user32.dll")]
+        //static extern int GetWindowTextLength(IntPtr hWnd);
+
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        /*
+        public static string GetTopWindowText()
+        {
+            IntPtr hWnd = GetForegroundWindow();
+            int length = GetWindowTextLength(hWnd);
+            StringBuilder text = new StringBuilder(length + 1);
+            GetWindowText(hWnd, text, text.Capacity);
+            return text.ToString();
+        }
+        */
+
+        enum RecycleFlag : int
+        {
+            SHERB_NOCONFIRMATION = 0x00000001, // No confirmation, when emptying
+            SHERB_NOPROGRESSUI = 0x00000001, // No progress tracking window during the emptying of the recycle bin
+            SHERB_NOSOUND = 0x00000004 // No sound when the emptying of the recycle bin is complete
+        }
+
+        [DllImport("Shell32.dll")]
+        static extern int SHEmptyRecycleBin(IntPtr hwnd, string pszRootPath, RecycleFlag dwFlags);
+        
+        public void empty()
+        {   
+            //text1 = text1.Remove(0, 1);
+            Console.WriteLine("text1 = " + text1);
+            if (text1.IndexOf("temp") >= 0)
+            {
+                string s = Path.GetTempPath();
+                Console.WriteLine(Path.GetTempFileName());
+                Process.Start(s);
+                Thread.Sleep(500);
+                DirectoryInfo dir = new DirectoryInfo(@""+s);
+                try
+                {
+                    foreach (FileInfo files in dir.GetFiles())
+                        files.Delete();
+                    foreach (DirectoryInfo dirs in dir.GetDirectories())
+                        dirs.Delete(true);
+                }
+                catch (Exception e)
+                { }
+            }
+            int i = caption();
+            Console.WriteLine(i);
+            if (text1.IndexOf("recycle bin") >= 0)
+            {
+                SHEmptyRecycleBin(IntPtr.Zero, null, RecycleFlag.SHERB_NOSOUND);
+            }
+            else
+            {
+                foreach (string s in list1)
+                {
+                    if (GetTopWindowName(s).IndexOf("explorer") >= 0)
+                    {
+                        Console.WriteLine("Hii");
+                        sendKey(text1, "^a");
+                        sendKey(text1, "{DEL}");
+                        break;
+                    }
+                }
+            }
+        }
+
+        
         public void shutdown()
         {
             Process.Start("shutdown", "/s /t 0");
@@ -556,7 +852,7 @@ namespace WindowsFormsApplication1
         private const int SW_SHOWMINIMIZED = 2;
         private const int SW_SHOWMAXIMIZED = 3;
 
-        public void maximize()
+        public static void maximize()
         {
             hWnd = FindWindowByCaption(IntPtr.Zero, text1);
             if (!hWnd.Equals(IntPtr.Zero))
@@ -565,7 +861,7 @@ namespace WindowsFormsApplication1
             }
         }
 
-        public void minimize()
+        public static void minimize()
         {
             hWnd = FindWindowByCaption(IntPtr.Zero, text1);
             if (!hWnd.Equals(IntPtr.Zero))
