@@ -17,6 +17,8 @@ namespace WindowsFormsApplication1
     {
         List<int> appId = new List<int>();
         List<int> cmdId = new List<int>();
+        List<string> action = new List<string>();
+        List<string> shortcut = new List<string>();
         List<string> cmdName = new List<string>();
         int selectedId = 0;
         int index;
@@ -90,9 +92,13 @@ namespace WindowsFormsApplication1
 
         private void loadTable(object sender, EventArgs e)
         {
+            
             selectedId = comboBox1.SelectedIndex;
-            Console.WriteLine(selectedId);
+            //Console.WriteLine(selectedId);
             viewSetting(comboBox1.SelectedIndex);
+            radioButton1.Checked = false;
+            radioButton2.Checked = false;
+            radioButton3.Checked = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -133,6 +139,7 @@ namespace WindowsFormsApplication1
             {
                 case 0: label3.Text = "Select Program";
                     button2.Visible = true;
+                    richTextBox1.Text = "";
                     button2.Text = "Select Program";
                     break;
                 case 1: label3.Text = "URL";
@@ -141,10 +148,12 @@ namespace WindowsFormsApplication1
                     break;
                 case 2: label3.Text = "Select Directory";
                     button2.Visible = true;
+                    richTextBox1.Text = "";
                     button2.Text = "Select Directory";
                     break;
                 case 3:
                     button2.Visible = false;
+                    richTextBox1.Text = "";
                     break;
                 case 4: label3.Text = "Command Name";
                     richTextBox1.Visible = false;
@@ -154,13 +163,15 @@ namespace WindowsFormsApplication1
                     {
                         Value.conn = new MySqlConnection(Value.cs);
                         Value.conn.Open();
-                        string s = "SELECT * FROM command where application_id=0";
+                        string s = "SELECT * FROM command WHERE application_id=0 AND shortcut<>'0'";
                         Value.cmd = new MySqlCommand(s, Value.conn);
                         Value.mdr = Value.cmd.ExecuteReader();
                         while (Value.mdr.Read())
                         {
                             cmdId.Add(Value.mdr.GetInt32(0));
                             cmdName.Add(Value.mdr.GetString(1));
+                            action.Add(Value.mdr.GetString(3));
+                            shortcut.Add(Value.mdr.GetString(4));
                             comboBox3.Items.Add(Value.mdr.GetString(1).ToString());
                         }                        
                     }
@@ -188,23 +199,60 @@ namespace WindowsFormsApplication1
             richTextBox1.Text = "";
             label3.Text = "";
             comboBox2.SelectedIndex = -1;
-            flowLayoutPanel1.Visible = false; 
+            flowLayoutPanel1.Visible = false;
+            radioButton1.Checked = false;
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             string commandName = textBox1.Text;
-            string command="";
+            string command = "", act = "";
             command = command + richTextBox1.Text;
             command = command.Replace("\\", "\\\\");
+            if (String.IsNullOrEmpty(command))
+            {
+                int index = comboBox3.SelectedIndex;
+                Console.WriteLine("Command Id = " + cmdId[index] + " Command Name = " + cmdName[index]);
+                command = cmdName[index];
+                act = action[index];
+                command = shortcut[index];
+                /*
+                string s = act;
+                //string temp = "";
+                for (int i = 0; i < s.Length; i++)
+                {
+                    //Console.WriteLine(s[i]);
+                    if (Char.IsLower(s[i]))
+                        s = s.Insert(i++, "+");
+                    else
+                    {
+                        switch (s[i])
+                        {
+                            case '^': s = s.Replace(s[i].ToString(), "CTRL");
+                                break;
+                            case '%': s = s.Replace(s[i].ToString(), "ALT");
+                                break;
+                            case '+': s = s.Replace(s[i].ToString(), "SHIFT");
+                                break;
+                        }
+                    }
+                    //Console.WriteLine(s);
+                    //temp = temp + s[i];
+                }
+                command = s.ToUpper();
+                //Console.WriteLine(s);
+                //Console.WriteLine(act);
+                //command = temp;
+                  */          
+            }
             int id = 0;
-            string s = "";
+            string s1 = "";
             try     {
                 Value.conn = new MySqlConnection(Value.cs);
                 Value.conn.Open();
                 
-                s = "Select MAX(command_id) FROM command";
-                Value.cmd = new MySqlCommand(s, Value.conn);
+                s1 = "Select MAX(command_id) FROM command";
+                Value.cmd = new MySqlCommand(s1, Value.conn);
                 Value.mdr = Value.cmd.ExecuteReader();
 
                 if (Value.mdr.Read())
@@ -221,8 +269,8 @@ namespace WindowsFormsApplication1
             }
 
             try     {
-                s = "INSERT INTO command VALUES (" + (id + 1) + ",'"+commandName+"',5,'"+command+"','"+command+"',0)";
-                Value.cmd = new MySqlCommand(s, Value.conn);
+                s1 = "INSERT INTO command VALUES (" + (id + 1) + ",'"+commandName+"',5,'"+act+"','"+command+"',0)";
+                Value.cmd = new MySqlCommand(s1, Value.conn);
                 Value.mdr = Value.cmd.ExecuteReader();
 
                 while (Value.mdr.Read())
@@ -239,8 +287,12 @@ namespace WindowsFormsApplication1
                 if (Value.conn != null)
                     Value.conn.Close();
             }
-            MessageBox.Show("Command Added");
+            //MessageBox.Show("Command Added");
             hide();
+            panel3.Visible = false;
+            comboBox1.SelectedIndex = 5;
+            loadTable(null, new EventArgs());
+            radioButton1.Checked = false;
             /*
                 connection.Open();
                 cmd.CommandText = ("INSERT INTO custom_command (command_id,command_name,action,command) VALUES (" + (id + 1) + ", @CommandName, @Action, @Command)");
@@ -274,7 +326,6 @@ namespace WindowsFormsApplication1
                 dataGridView1.ReadOnly = true;
             button6.Visible = true;
             button7.Visible = true;
-            //panel3.Visible = true;
             panel1.Visible = false;
             try
             {
@@ -306,23 +357,24 @@ namespace WindowsFormsApplication1
             return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
         }
 
+        bool delete = false;
+
         private void button6_Click(object sender, EventArgs e)
         {
             //int i=dataGridView1.NewRowIndex;
             //Console.WriteLine(i);
-            Value.conn.Open();
-            if (dataGridView1.RowCount >= 1)
+            if (delete == false)
             {
-                Console.WriteLine(dataGridView1.RowCount);
-                for (int x = 0; x < dataGridView1.RowCount ; x++)
+                Value.conn.Open();
+                if (dataGridView1.RowCount >= 1)
                 {
-                    if (dataGridView1.Rows[x].Cells[1].Value.ToString() != "" && dataGridView1.Rows[x].Cells[1].Value != null)
+                    Console.WriteLine(dataGridView1.RowCount);
+                    for (int x = 0; x < dataGridView1.RowCount; x++)
                     {
-                        //SqlCommand cmdSave = new SqlCommand("UPDATE command SET command_name=@cname,   shortcut=@shortcut, action=@action WHERE command_id=@cid ");
-                        
-                            //cmdSave.Parameters.Add("@cname", SqlDbType.VarChar).Value = dataGridView1.Rows[x].Cells[1].Value.ToString();
+                        if (dataGridView1.Rows[x].Cells[1].Value.ToString() != "" && dataGridView1.Rows[x].Cells[1].Value != null)
+                        {
                             string skt = dataGridView1.Rows[x].Cells[2].Value.ToString();
-                            string []s = skt.Split('+');
+                            string[] s = skt.Split('+');
                             string temp = "";
                             for (int i = 0; i < s.Length; i++)
                             {
@@ -337,11 +389,6 @@ namespace WindowsFormsApplication1
                             //Console.WriteLine(temp);
                             //Console.WriteLine(skt);
                             skt = temp;
-                            //Console.WriteLine(skt.ToLower());
-                            //cmdSave.Parameters.Add("@shortcut", SqlDbType.VarChar).Value = dataGridView1.Rows[x].Cells[1].Value.ToString();
-                            //cmdSave.Parameters.Add("@action", SqlDbType.VarChar).Value = skt.ToLower();
-                            //cmdSave.Parameters.Add("@cid", SqlDbType.VarChar).Value = dataGridView1.Rows[x].Cells[3].Value.ToString();
-
                             String sql = "UPDATE command SET command_name='" + dataGridView1.Rows[x].Cells[1].Value.ToString() +
                                     "', shortcut='" + dataGridView1.Rows[x].Cells[2].Value.ToString() +
                                     "', action='" + skt.ToLower() +
@@ -350,48 +397,140 @@ namespace WindowsFormsApplication1
                             Value.cmd = new MySqlCommand(sql, Value.conn);
                             Value.mdr = Value.cmd.ExecuteReader();
                             Value.mdr.Close();
-                            
-                        //MessageBox.Show("Record Updated!");
+                            }
                     }
                 }
+                Value.conn.Close();
+                loadTable(null, new EventArgs());
+                //MessageBox.Show("Record Updated!");
             }
-            Value.conn.Close();
-            /*String s = "";
-            for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
+            else
             {
-                s = "Insert into command(date,column1,....) values ("
-                            + System.DateTime.Now + ", "
-                            + dataGridView1.Rows[i].Cells[1].Value + ".......);";
-                Value.cmd = new MySqlCommand(s, Value.conn);
-                Value.mdr = Value.cmd.ExecuteReader();
-                cmd.CommandText = Strquery;
-                cmd.ExecuteNonQuery();
-            }*/
-            MessageBox.Show("Record Updated!");
+                Value.conn.Open();
+                for (int i = 0; i < dataGridView1.SelectedRows.Count; i++)
+                {
+                    int id = Int32.Parse(dataGridView1.SelectedRows[i].Cells[0].Value.ToString());
+                    //MessageBox.Show("" + id);
+                    String sql = "DELETE FROM command WHERE command_id= " + dataGridView1.SelectedRows[i].Cells[0].Value;// id;
+                    Value.cmd = new MySqlCommand(sql, Value.conn);
+                    Value.mdr = Value.cmd.ExecuteReader();
+                    Value.mdr.Close();
+                }
+                button6.Visible = false;
+                button7.Visible = false;
+                loadTable(null, new EventArgs());
+            }
         }
-        /*
-        private void button3_Click_1(object sender, EventArgs e)
-        {
-
-        }*/
-
+        
         private void button7_Click(object sender, EventArgs e)
         {
             button6.Visible = false;
             button7.Visible = false;
             dataGridView1.ReadOnly = true;
+            radioButton1.Checked = false;
+            radioButton2.Checked = false;
+            loadTable(null,new EventArgs());
+            delete = false;
         }
-        /*
-        private void button4_Click_1(object sender, EventArgs e)
+     
+        public void addCommand()
         {
-            textBox1.Text = "";
-            richTextBox1.Text = "";
-            label3.Text = "";
-            label3.Visible = false;
+            flowLayoutPanel1.Visible = true;
+            dataGridView1.ReadOnly = true;
+            panel1.Visible = true;
+            panel3.Visible = true;
+            button6.Visible = false;
+            button7.Visible = false;
             richTextBox1.Visible = false;
-            button2.Visible = false;
-            comboBox2.SelectedIndex = -1;
-            flowLayoutPanel1.Visible = false;
-        }*/
+        }
+
+        public void editCommand()
+        {
+            button6.Text = "Save"; 
+            if (selectedId == 5)
+                dataGridView1.ReadOnly = false;
+            else
+                dataGridView1.ReadOnly = true;
+            panel1.Visible = false;
+        }
+
+        public void deleteCommand()
+        {
+            delete = true;
+            button6.Text = "Delete";
+            button6.Visible = true;
+            button7.Visible = true;
+        }
+
+        private void cellChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            button6.Visible = true;
+            button7.Visible = true;
+        }
+
+        bool isChecked = false;
+
+        private void radioButton1_Click(object sender, EventArgs e)
+        {
+            if (radioButton1.Checked && !isChecked)
+            {
+                radioButton1.Checked = false;
+                button4_Click(null, new EventArgs());
+            }
+            else
+            {
+                radioButton1.Checked = true;
+                addCommand();
+                isChecked = false;
+            } 
+        }
+
+        private void radioButton2_Click(object sender, EventArgs e)
+        {
+            button6.Visible = false;
+            button7.Visible = false;
+            if (radioButton2.Checked && !isChecked)
+            {
+                radioButton2.Checked = false;
+                button7_Click(null, new EventArgs());
+            }
+            else
+            {
+                radioButton2.Checked = true;
+                editCommand();
+                isChecked = false;
+            }
+        }
+
+        private void radioButton3_Click(object sender, EventArgs e)
+        {
+            button6.Visible = false;
+            button7.Visible = false;
+            if (radioButton3.Checked && !isChecked)
+            {
+                radioButton3.Checked = false;
+            }
+            else
+            {
+                radioButton3.Checked = true;
+                deleteCommand();
+                isChecked = false;
+            }
+        }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            isChecked = radioButton1.Checked;
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            isChecked = radioButton2.Checked;
+        }
+
+        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        {
+            isChecked = radioButton3.Checked;
+        }
     }
 }

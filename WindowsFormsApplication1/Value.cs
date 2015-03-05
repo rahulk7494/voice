@@ -19,7 +19,8 @@ namespace WindowsFormsApplication1
         public static MySqlDataReader mdr = null;
         public static MySqlCommand cmd;
         public static bool rfound = false;
-        //public static bool doMorpho = true;
+        public static List<string> folderContents = new List<string>();
+        public static bool folder = false;
         
     }
 }

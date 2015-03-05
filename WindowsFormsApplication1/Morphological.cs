@@ -71,7 +71,7 @@ namespace WindowsFormsApplication1
 
         public int searchCommand()
         {
-            String a = File.ReadAllText(@"E:\vesper.txt");
+            String a = File.ReadAllText(@"E:\input.txt");
             try
             {
                 Value.conn = new MySqlConnection(Value.cs);
@@ -93,9 +93,16 @@ namespace WindowsFormsApplication1
                         Console.WriteLine("Match Found : Command Id=" + Value.mdr.GetInt32(0));
                        // if (action.Equals("rightclick"))
                           //  Value.rfound = true;
+                        if (Value.mdr.GetInt32(0)==36)
+                        {
+                            KeyboardSend.KeyDown(Keys.LWin);
+                            KeyboardSend.KeyUp(Keys.LWin);
+                            return 1;
+                        }
                         if (action.StartsWith("."))
                         {
                             action = action.Remove(0, 1);
+                            //Function.setText(Value.activeApplication);
                             Function.callMethod(action);
                             return 1;
                         }
@@ -167,7 +174,7 @@ namespace WindowsFormsApplication1
             //con.Open();
             
             String[] arr2 = TokenizeSentence("This too shall pass");
-            String[] arr3 = TokenizeSentence(System.IO.File.ReadAllText(@"E:\vesper.txt"));
+            String[] arr3 = TokenizeSentence(System.IO.File.ReadAllText(@"E:\input.txt"));
             int len = arr3.Length;
             int i,j,flag;
             String[] arr1 = PosTagTokens(arr3);
@@ -209,39 +216,39 @@ namespace WindowsFormsApplication1
             {*/
                 // reader.Dispose();
 
-                if (File.Exists(@"E:\iota.txt"))
+                if (File.Exists(@"E:\output.txt"))
                 {
-                    File.Delete(@"E:\iota.txt");
+                    File.Delete(@"E:\output.txt");
                 }
-                if (File.Exists(@"E:\iota2.txt"))
+                if (File.Exists(@"E:\output2.txt"))
                 {
-                    File.Delete(@"E:\iota2.txt");
+                    File.Delete(@"E:\output2.txt");
                 }
-                if (File.Exists(@"E:\iota3.txt"))
+                if (File.Exists(@"E:\output3.txt"))
                 {
-                    File.Delete(@"E:\iota3.txt");
+                    File.Delete(@"E:\output3.txt");
                 }
                 if (File.Exists(@"E:\final_run.bat"))
                 {
                     File.Delete(@"E:\final_run.bat");
                 }
-                if (File.Exists(@"E:\iota4.txt"))
+                if (File.Exists(@"E:\output4.txt"))
                 {
-                    File.Delete(@"E:\iota4.txt");
+                    File.Delete(@"E:\output4.txt");
                 }
                 //string s = "";
                 for (i = 0; i < len; i++)
                 {
                     //s = s + arr1[i] + "\r\n";
-                    System.IO.File.AppendAllText((@"E:\iota.txt"), arr1[i] + Environment.NewLine);
+                    System.IO.File.AppendAllText((@"E:\output.txt"), arr1[i] + Environment.NewLine);
                 }
-                //System.IO.File.WriteAllText((@"E:\iota.txt"), s);
+                //System.IO.File.WriteAllText((@"E:\output.txt"), s);
                 //String[] str = { "asdfg" };
                 porter.Stemmer class1 = new porter.Stemmer();
                 class1.morphine();
                 j = 0;
-                System.IO.StreamReader file = new System.IO.StreamReader(@"E:\iota.txt");
-                System.IO.StreamReader file2 = new System.IO.StreamReader(@"E:\iota_new.txt");
+                System.IO.StreamReader file = new System.IO.StreamReader(@"E:\output.txt");
+                System.IO.StreamReader file2 = new System.IO.StreamReader(@"E:\output_new.txt");
                 //MySqlDataReader reader = cmd.ExecuteReader();
                 i = 0;
                 Console.WriteLine("len :" + len);
@@ -251,10 +258,12 @@ namespace WindowsFormsApplication1
                     flag = 0;
                     str1 = file.ReadLine();
                     str2 = file2.ReadLine();
-                    if (arr1[i] == "CC" || arr1[i] == "FW" || arr1[i] == "IN" || arr1[i] == "NN" || arr1[i] == "NNS" || arr1[i] == "NNP" || arr1[i] == "NNPS" || arr1[i] == "TO" || arr1[i] == "UH" || arr1[i] == "VB" || arr1[i] == "VBD" || arr1[i] == "VBG" || arr1[i] == "VBN" || arr1[i] == "VBP" || arr1[i] == "VBZ")
+                    if (arr1[i] == "CC" || arr1[i] == "FW" || arr1[i] == "IN" || arr1[i] == "NN" || arr1[i] == "NNS" || arr1[i] == "NNP" || arr1[i] == "NNPS" || 
+                        arr1[i] == "RB" || arr1[i] == "RBR" || arr1[i] == "RBS" || arr1[i] == "TO" || arr1[i] == "UH" || arr1[i] == "VB" || arr1[i] == "VBD" || 
+                        arr1[i] == "VBG" || arr1[i] == "VBN" || arr1[i] == "VBP" || arr1[i] == "VBZ")
                     {
-                        if (arr1[i] == "NNP" || arr1[i] == "FW" || arr1[i] == "NN" || arr1[i] == "NNS")
-                            while ((i <= (len - 1)) && (arr1[i] == "NNP" || arr1[i] == "FW" || arr1[i] == "NN" || arr1[i] == "NNS"))
+                        if (arr1[i] == "NNP" || arr1[i] == "FW" || arr1[i] == "NN" || arr1[i] == "NNS"|| arr1[i] == "RB" || arr1[i] == "RBR" || arr1[i] == "RBS")
+                            while ((i <= (len - 1)) && (arr1[i] == "NNP" || arr1[i] == "FW" || arr1[i] == "NN" || arr1[i] == "NNS"|| arr1[i] == "RB" || arr1[i] == "RBR" || arr1[i] == "RBS"))
                             {
                                 arr4[j] = 1;
                                 if (flag != 0)
@@ -268,8 +277,8 @@ namespace WindowsFormsApplication1
                                 arr5[j] = str1;
                                 arr6[j] = str2;
                                 flag++;
-                                System.IO.File.AppendAllText(@"E:\iota3.txt", arr1[i] + "      " + Environment.NewLine);
-                                System.IO.File.AppendAllText(@"E:\iota4.txt", arr6[j] + "      " + Environment.NewLine);
+                                System.IO.File.AppendAllText(@"E:\output3.txt", arr1[i] + "      " + Environment.NewLine);
+                                System.IO.File.AppendAllText(@"E:\output4.txt", arr6[j] + "      " + Environment.NewLine);
                                 j++;
                                 i++;
                             }
@@ -277,8 +286,8 @@ namespace WindowsFormsApplication1
                         {
                             if (j >= 1 && (arr5[j - 1] == "VB" || arr5[j - 1] == "VBD" || arr5[j - 1] == "VBG" || arr5[j - 1] == "VBN" || arr5[j - 1] == "VBP" || arr5[j - 1] == "VBZ"))
                             {
-                                System.IO.File.AppendAllText(@"E:\iota3.txt", "Replaced " + arr5[j - 1] + "  with   " + str1 + Environment.NewLine);
-                                System.IO.File.AppendAllText(@"E:\iota4.txt", "Replaced " + arr6[j - 1] + "  with   " + str2 + Environment.NewLine);
+                                System.IO.File.AppendAllText(@"E:\output3.txt", "Replaced " + arr5[j - 1] + "  with   " + str1 + Environment.NewLine);
+                                System.IO.File.AppendAllText(@"E:\output4.txt", "Replaced " + arr6[j - 1] + "  with   " + str2 + Environment.NewLine);
                                 arr5[j - 1] = str1;
                                 arr6[j - 1] = str2;
                                 i++;
@@ -287,8 +296,8 @@ namespace WindowsFormsApplication1
                             {
                                 arr5[j] = str1;
                                 arr6[j] = str2;
-                                System.IO.File.AppendAllText(@"E:\iota3.txt", arr1[i] + "      " + Environment.NewLine);
-                                System.IO.File.AppendAllText(@"E:\iota4.txt", arr6[j] + "      " + Environment.NewLine);
+                                System.IO.File.AppendAllText(@"E:\output3.txt", arr1[i] + "      " + Environment.NewLine);
+                                System.IO.File.AppendAllText(@"E:\output4.txt", arr6[j] + "      " + Environment.NewLine);
                                 j++;
                                 i++;
                             }
@@ -297,8 +306,8 @@ namespace WindowsFormsApplication1
                         {
                             arr5[j] = str1;
                             arr6[j] = str2;
-                            System.IO.File.AppendAllText(@"E:\iota3.txt", arr1[i] + "      " + Environment.NewLine);
-                            System.IO.File.AppendAllText(@"E:\iota4.txt", arr6[j] + "      " + Environment.NewLine);
+                            System.IO.File.AppendAllText(@"E:\output3.txt", arr1[i] + "      " + Environment.NewLine);
+                            System.IO.File.AppendAllText(@"E:\output4.txt", arr6[j] + "      " + Environment.NewLine);
                             j++;
                             arr4[j] = 2;
                             i++;
@@ -307,8 +316,8 @@ namespace WindowsFormsApplication1
                         {
                             arr5[j] = str1;
                             arr6[j] = str2;
-                            System.IO.File.AppendAllText(@"E:\iota3.txt", arr1[i] + "      " + Environment.NewLine);
-                            System.IO.File.AppendAllText(@"E:\iota4.txt", arr6[j] + "      " + Environment.NewLine);
+                            System.IO.File.AppendAllText(@"E:\output3.txt", arr1[i] + "      " + Environment.NewLine);
+                            System.IO.File.AppendAllText(@"E:\output4.txt", arr6[j] + "      " + Environment.NewLine);
                             j++;
                             arr4[j] = 3;
                             i++;
@@ -317,8 +326,8 @@ namespace WindowsFormsApplication1
                         {
                             arr5[j] = str1;
                             arr6[j] = str2;
-                            System.IO.File.AppendAllText(@"E:\iota3.txt", arr1[i] + "      " + Environment.NewLine);
-                            System.IO.File.AppendAllText(@"E:\iota4.txt", arr6[j] + "      " + Environment.NewLine);
+                            System.IO.File.AppendAllText(@"E:\output3.txt", arr1[i] + "      " + Environment.NewLine);
+                            System.IO.File.AppendAllText(@"E:\output4.txt", arr6[j] + "      " + Environment.NewLine);
                             j++;
                             arr4[j] = 4;
                             i++;
@@ -341,14 +350,20 @@ namespace WindowsFormsApplication1
                 bool temp = false;              // check whether application is added or not
                 string app = "";
                 string cmd = "";
+                bool noun = false;
                 //Console.WriteLine(len);
                 for (i = 0; i < len; i++)
                 {
                     j = i;
                     Console.WriteLine("*****" + arr5[i] + "\t" + arr6[i]);
-                    if (arr5[i].Equals("VBG") || arr5[i].Equals("VB"))// || arr5[i].Equals("VBN") || arr5[i].Equals("TO"))
+                    if (arr5[i].Equals("VBG") || arr5[i].Equals("VB") || arr5[i].Equals("VBN"))
                     {
                         k = i;
+                        if (noun == true)
+                        {
+                            app = cmd;
+                            cmd = "";
+                        } 
                         cmd = cmd + " " + arr6[k]; //commandList.Add(arr6[k]);
                         //temp = true;
                       /*  if (arr6[k].Equals("rightclick"))
@@ -358,7 +373,7 @@ namespace WindowsFormsApplication1
                         }*/
                         for (p = j + 1; p < len; p++)
                         {
-                            if (arr5[p].Equals("NNS") || arr5[p].Equals("NN"))
+                            if (arr5[p].Equals("NNS") || arr5[p].Equals("NN") || arr5[p].Equals("NNP") || arr5[p].Equals("RB") || arr5[p].Equals("RBR") || arr5[p].Equals("RBS"))
                             {
                                 app = app + " " + arr6[p];    //application.Add(arr6[p]);
                                 temp = true;
@@ -372,8 +387,10 @@ namespace WindowsFormsApplication1
                     }
                     else if (temp==false && (arr5[i].Equals("NN") || arr5[i].Equals("NNS")))             // for custom commands
                     {
-                        cmd = cmd + " " + arr6[i]; 
+                        cmd = cmd + " " + arr6[i];
+                        noun = true;
                     }
+                    
                     /*else if ((arr5[i].Equals("NN") || arr5[i].Equals("NNS")) && temp == false)
                     {
                         app = app + " " + arr6[i];
@@ -415,6 +432,14 @@ namespace WindowsFormsApplication1
                     Console.WriteLine("AppId => " + Value.appId);
                     if (commandList[i].ToLower().Equals(" open") || commandList[i].ToLower().Equals(" start") || commandList[i].ToLower().Equals(" launch"))
                     {
+                      /*  if (Value.folder == true)
+                        {
+                            foreach(string f in Value.folderContents)
+                            {
+                                if (app.IndexOf(f) >= 0)
+                                    Function.sendKey(Value.activeApplication, "{ENTER}");
+                            }
+                        }*/
                         if (flag1 == 0)
                         {
                             if (Function.searchFile(application[i]) == 1)
@@ -697,7 +722,7 @@ namespace porter
                 if (!cons(i)) break; i++;
             }
             i++;
-            System.IO.File.AppendAllText((@"E:\iota_new2.txt"), "i === " + i + "n === " + n + Environment.NewLine);
+            System.IO.File.AppendAllText((@"E:\output_new2.txt"), "i === " + i + "n === " + n + Environment.NewLine);
             while (true)
             {
                 while (true)
@@ -708,7 +733,7 @@ namespace porter
                 }
                 i++;
                 n++;
-                System.IO.File.AppendAllText((@"E:\iota_new2.txt"), "i === " + i + "n === " + n + Environment.NewLine);
+                System.IO.File.AppendAllText((@"E:\output_new2.txt"), "i === " + i + "n === " + n + Environment.NewLine);
                 while (true)
                 {
                     if (i > j) return n;
@@ -716,7 +741,7 @@ namespace porter
                     i++;
                 }
                 i++;
-                System.IO.File.AppendAllText((@"E:\iota_new2.txt"), "i === " + i + "n === " + n + Environment.NewLine);
+                System.IO.File.AppendAllText((@"E:\output_new2.txt"), "i === " + i + "n === " + n + Environment.NewLine);
                 return n;
             }
         }
@@ -846,11 +871,11 @@ namespace porter
 
             else if ((ends("ed") || ends("ing")) && vowelinstem())
             {
-                System.IO.File.AppendAllText((@"E:\iota_new2.txt"), "j === " + j + Environment.NewLine);
-                System.IO.File.AppendAllText((@"E:\iota_new2.txt"), "k === " + k + Environment.NewLine);
+                System.IO.File.AppendAllText((@"E:\output_new2.txt"), "j === " + j + Environment.NewLine);
+                System.IO.File.AppendAllText((@"E:\output_new2.txt"), "k === " + k + Environment.NewLine);
                 k = j;
-                System.IO.File.AppendAllText((@"E:\iota_new2.txt"), "j === " + j + Environment.NewLine);
-                System.IO.File.AppendAllText((@"E:\iota_new2.txt"), "k === " + k + Environment.NewLine);
+                System.IO.File.AppendAllText((@"E:\output_new2.txt"), "j === " + j + Environment.NewLine);
+                System.IO.File.AppendAllText((@"E:\output_new2.txt"), "k === " + k + Environment.NewLine);
                 if (ends("at"))
                     setto("ate");
                 else if (ends("bl"))
@@ -1047,23 +1072,23 @@ namespace porter
         public void morphine()
         {
 
-            System.IO.StreamReader file = new System.IO.StreamReader(@"E:\iota.txt");
-            FileStream ipt = new FileStream(@"E:\vesper.txt", FileMode.Open, FileAccess.Read);
+            System.IO.StreamReader file = new System.IO.StreamReader(@"E:\output.txt");
+            FileStream ipt = new FileStream(@"E:\input.txt", FileMode.Open, FileAccess.Read);
             char[] w = new char[501];
             Stemmer s = new Stemmer();
 
-            if (File.Exists(@"E:\iota_new.txt"))
+            if (File.Exists(@"E:\output_new.txt"))
             {
-                File.Delete(@"E:\iota_new.txt");
+                File.Delete(@"E:\output_new.txt");
             }
-            if (File.Exists(@"E:\iota_new2.txt"))
+            if (File.Exists(@"E:\output_new2.txt"))
             {
-                File.Delete(@"E:\iota_new2.txt");
+                File.Delete(@"E:\output_new2.txt");
             }
 
             try
             {
-                FileStream _in = new FileStream(@"E:\vesper.txt", FileMode.Open, FileAccess.Read);
+                FileStream _in = new FileStream(@"E:\input.txt", FileMode.Open, FileAccess.Read);
                 try
                 {
                     while (true)
@@ -1099,7 +1124,7 @@ namespace porter
                                         u = str;
                                     /* to test getResultBuffer(), getResultLength() : */
                                     /* u = new String(s.getResultBuffer(), 0, s.getResultLength()); */
-                                    System.IO.File.AppendAllText((@"E:\iota_new.txt"), u + Environment.NewLine);
+                                    System.IO.File.AppendAllText((@"E:\output_new.txt"), u + Environment.NewLine);
                                     //Console.Write(u);
                                     break;
                                 }
