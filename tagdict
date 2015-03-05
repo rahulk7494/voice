@@ -2309,6 +2309,7 @@ Matthews NNP
 mature VBP NNP VB
 maturing VBG
 maturity NN
+maximize VB
 Maxwell NNP
 may MD
 May NNP
@@ -2380,7 +2381,8 @@ Mills NNP
 mind NN VB
 mine NN JJ PRP
 mines NNS
-Mingo NNP
+Mingo 
+minimize VB
 minimum-wage NN
 minimum NN JJ
 MiniScribe NNP
@@ -3150,6 +3152,7 @@ responsible JJ
 rest NN VB
 restated VBN JJ VBD
 restaurant NN
+restore VB 
 restrictions NNS
 restructuring NN VBG
 result NN VBP VB
@@ -3183,6 +3186,7 @@ Ridley NNP
 Rifenburgh NNP
 right NN JJ RB
 Right NNP RB
+rightclick VB
 Rights NNPS
 rights NNS
 RISC NNP

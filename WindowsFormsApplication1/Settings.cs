@@ -269,10 +269,14 @@ namespace WindowsFormsApplication1
             }
 
             try     {
+<<<<<<< HEAD
                 if (comboBox3.SelectedIndex == 4)
                     s1 = "INSERT INTO command VALUES (" + (id + 1) + ",'" + commandName + "',5,'" + act + "','" + command + "',0)";
                 else
                     s1 = "INSERT INTO command VALUES (" + (id + 1) + ",'" + commandName + "',5,'" + command + "','" + command + "',0)";
+=======
+                s1 = "INSERT INTO command VALUES (" + (id + 1) + ",'"+commandName+"',5,'"+act+"','"+command+"',0)";
+>>>>>>> e30232854127235b63efcbc9d62776693c464925
                 Value.cmd = new MySqlCommand(s1, Value.conn);
                 Value.mdr = Value.cmd.ExecuteReader();
 
