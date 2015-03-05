@@ -98,11 +98,11 @@ namespace WindowsFormsApplication1
 
         private void recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
-            if (e.Result.Text.IndexOf("ok")>=0)
+            if (e.Result.Text.IndexOf("okay")>=0)
             {
                 Console.WriteLine(textBox1.Text);
                 string arr = textBox1.Text;
-                System.IO.File.WriteAllText(@"E:\vesper.txt", arr);
+                System.IO.File.WriteAllText(@"E:\input.txt", arr);
                 textBox1.Text = "";
                 Morphological m = new Morphological();
                 m.buttonClicked();
@@ -251,14 +251,12 @@ namespace WindowsFormsApplication1
 
         private void button2_Click(object sender, EventArgs e)
         {
-      //      KeyboardSend.KeyDown(Keys.RButton);
-        //    KeyboardSend.KeyUp(Keys.RButton);
             Console.WriteLine();
             Console.WriteLine("===================================================================================================================");
             Console.WriteLine(); 
             Console.WriteLine(textBox1.Text);
-            string arr = textBox1.Text;
-            System.IO.File.WriteAllText(@"E:\vesper.txt", arr);
+            string arr = textBox1.Text.ToLower();
+            System.IO.File.WriteAllText(@"E:\input.txt", arr);
             textBox1.Text = "";
             textBox2.Text = "Success";
             Morphological m = new Morphological();

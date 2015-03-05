@@ -369,10 +369,11 @@ namespace WindowsFormsApplication1
             EnumWindows(new WindowEnumCallback(this.AddWnd), 0);
             foreach (string s in Windows)
             {
-                if (!String.IsNullOrEmpty(s) && !s.Equals("Start") && !s.Equals("Program Manager"))
+                string s1 = GetTopWindowName(s);
+                if ((s1.IndexOf("Explorer.EXE") >= 0) && !String.IsNullOrEmpty(s) && !s.Equals("Start") && !s.Equals("Program Manager"))
                 {
                     list1.Add(s);
-                    Console.WriteLine("{0} {1} {2}", ++i, s, GetTopWindowName(s));
+                    //Console.WriteLine("{0} {1} {2}", ++i, s, GetTopWindowName(s));
                 }
             }
         
@@ -384,7 +385,8 @@ namespace WindowsFormsApplication1
             Console.WriteLine("Input text1=" + text1);
             int flag = 0;
             string[] tokens = GreedyTokenize(text1);
-            //getActiveWindows();
+            getActiveWindows();
+            Console.WriteLine("---------------- caption() -------------------");
             
             Process[] pr = Process.GetProcesses();
             foreach (Process p in pr)
@@ -404,7 +406,7 @@ namespace WindowsFormsApplication1
                 //  Console.WriteLine("List 1 Contents");
                 for (int i = 0; i <= count - 1; i++)
                 {
-                    //Console.Write(list1[i]+"\t");
+                    Console.WriteLine(list1[i]);
                     tokenize(list1[i].ToLower(), token.ToLower(), i);
                 }
                 list1.Clear();
@@ -445,6 +447,56 @@ namespace WindowsFormsApplication1
                     list1.Clear();
                     
                 }
+                /*string s1 = GetTopWindowName(text1);
+                //Console.WriteLine(s1);
+                string s11 = "", s12 = "";
+                if (s1.IndexOf("Explorer.EXE") >= 0)
+                {
+                    Value.folder = true;
+                    IntPtr MyHwnd = FindWindow(null, "Directory");
+                    var t = Type.GetTypeFromProgID("Shell.Application");
+                    dynamic o = Activator.CreateInstance(t);
+                    try
+                    {
+                        var ws = o.Windows();
+                        for (int i = 0; i < ws.Count; i++)
+                        {
+                            var ie = ws.Item(i);
+                            var path = System.IO.Path.GetFileName((string)ie.FullName);
+                            if (path.ToLower() == "explorer.exe")
+                            {
+                                var explorepath = ie.document.focuseditem.path;
+                                s11 = explorepath;
+                                if (s11.IndexOf(text1) >= 0)
+                                {
+                                   // Console.WriteLine(Directory.GetParent(s11).FullName);
+                                    s12 = Directory.GetParent(s11).FullName;
+                                }
+                            }
+                            if (ie == null || ie.hwnd != (long)MyHwnd)
+                                continue;
+                            
+                        }
+                    }
+                    finally
+                    {
+                        Marshal.FinalReleaseComObject(o);
+                    }
+                    string[] filePaths = Directory.GetFiles(@s12, "*.*",SearchOption.TopDirectoryOnly);
+                    foreach (string file in filePaths)
+                    {
+                        Value.folderContents.Add(file);
+                        //Console.WriteLine(file);
+                    }
+                    foreach (string dir in Directory.GetDirectories(@s12))
+                    {
+                        Value.folderContents.Add(dir);
+                        //Console.WriteLine(dir);
+                    }
+                    //foreach (string file in Value.folderContents)
+                    //    Console.WriteLine(file);
+                 
+                }*/
                 return 1;
             }
             catch (Exception e)
@@ -452,7 +504,6 @@ namespace WindowsFormsApplication1
                 Value.status = "Application Not Found";
                 Console.WriteLine(e.ToString());
             }
-           
             /*if (flag == 0)
             {
                 try
@@ -487,7 +538,7 @@ namespace WindowsFormsApplication1
                     if (Value.conn != null)
                         Value.conn.Close();
                 }
-                //Console.WriteLine("---------------------------  " + flag);
+            //Console.WriteLine("---------------------------  " + flag);
                 //Console.WriteLine("Application  Name = " + text1);        // app name extracted from windows form title
      
             return 0;
@@ -595,7 +646,7 @@ namespace WindowsFormsApplication1
                     {
                         action = Value.mdr.GetString(3);
                         flag = 1;
-                        //  Console.WriteLine("Match Found : Command Id=" + mdr3.GetInt32(0));
+                        Console.WriteLine("Match Found : Command Id=" + Value.mdr.GetInt32(0));
                     }
                 }
 
@@ -852,8 +903,14 @@ namespace WindowsFormsApplication1
         private const int SW_SHOWMINIMIZED = 2;
         private const int SW_SHOWMAXIMIZED = 3;
 
-        public static void maximize()
+        public void maximize()
         {
+            if (String.IsNullOrEmpty(text1))
+            {
+                text1 = Value.activeApplication;
+                if (caption() == 1)
+                { }            
+            }
             hWnd = FindWindowByCaption(IntPtr.Zero, text1);
             if (!hWnd.Equals(IntPtr.Zero))
             {
@@ -861,8 +918,14 @@ namespace WindowsFormsApplication1
             }
         }
 
-        public static void minimize()
+        public void minimize()
         {
+            if (String.IsNullOrEmpty(text1))
+            {
+                text1 = Value.activeApplication;
+                if (caption() == 1)
+                { }
+            }
             hWnd = FindWindowByCaption(IntPtr.Zero, text1);
             if (!hWnd.Equals(IntPtr.Zero))
             {
@@ -872,6 +935,12 @@ namespace WindowsFormsApplication1
 
         public static void restore()
         {
+            /*if (String.IsNullOrEmpty(text1))
+            {
+                text1 = Value.activeApplication;
+                if (caption() == 1)
+                { }
+            }*/
             hWnd = FindWindowByCaption(IntPtr.Zero, text1);
             if (!hWnd.Equals(IntPtr.Zero))
             {
